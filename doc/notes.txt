@@ -1,0 +1,15 @@
+Links:
+
+Tinker tutorial
+https://tkdocs.com/tutorial/intro.html#audience
+creating program menu
+https://www.tutorialspoint.com/python/tk_menu.htm
+switching between frames
+https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
+PY Serial doc
+https://pyserial.readthedocs.io/en/latest/tools.html
+
+
+Notes:
+*widgets can be relocated by just changing grid location.
+No need to delete old widget.
