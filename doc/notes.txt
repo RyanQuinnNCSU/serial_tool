@@ -8,7 +8,8 @@ switching between frames
 https://stackoverflow.com/questions/7546050/switch-between-two-frames-in-tkinter
 PY Serial doc
 https://pyserial.readthedocs.io/en/latest/tools.html
-
+Code example of a ribbon:
+https://github.com/israel-dryer/Notepad-Tk
 
 Notes:
 *widgets can be relocated by just changing grid location.
