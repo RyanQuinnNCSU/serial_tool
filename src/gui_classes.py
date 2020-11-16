@@ -45,11 +45,35 @@ class Commandframe(tk.Frame):
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('WN'))
         #ttk.Separator(self,orient="vertical").grid(column=3, rowspan=3,ipady=300)
-        tk.Button(self, text="Edit Command List").grid(column=1, row=1, sticky='WN')
-        tk.Label(self, text="Command Names").grid(column=1, row=2, sticky='WN')
-        tk.Label(self, text="Byte String").grid(column=2, row=2, sticky='WNN')
-
-
+        tk.Button(self, text="Edit Command List").grid(column=2, row=1, sticky='WN')
+        tk.Label(self, text="Command Names").grid(column=2, row=2, sticky='WN')
+        tk.Label(self, text="Byte String").grid(column=3, row=2, sticky='WNN')
+        #load config data
+        config = {}
+        with open("../json/config.json", "r") as read_file:
+            config = json.loads(read_file.read())
+            read_file.close()
+        #print command table
+        if config['Profile'] == "../json/default.json":
+            #make empty Table
+            for x in range(0, 8):
+                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNE')
+                tk.Label(self, text="       ",borderwidth=2, relief="solid").grid(column=2, row=x+3, sticky='WNE')
+                tk.Label(self, text="       ",borderwidth=2, relief="solid").grid(column=3, row=x+3, sticky='WNE')
+        else:
+            print("PH")
+    # def table(total_rows, total_columns,self,master,profile):
+    #     with open(profile, "r") as profile_file:
+    #         profile = json.loads(profile_file.read())
+    #         read_file.close()
+    #     for i in range(total_rows):
+    #         for j in range(total_columns):
+    #
+    #             self.e = Entry(master, width=20, fg='blue',
+    #                            font=('Arial',16,'bold'))
+    #
+    #             self.e.grid(row=i, column=j)
+    #             self.e.insert(END, lst[i][j])
 class Transactionframe(tk.Frame):
 
     def __init__(self, master):
@@ -67,6 +91,7 @@ class Optionsframe(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
+        #load config data
         config = {}
         with open("../json/config.json", "r") as read_file:
             config = json.loads(read_file.read())
