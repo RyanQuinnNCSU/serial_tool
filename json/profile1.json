@@ -3,8 +3,8 @@
   "Com Port": "COM 11",
   "Num_Commands": 3,
   "Commands": [
-    { "name":"C1", "bytes": [0,0,0,0,0]},
-    { "name":"C2", "bytes": [0,0,0,0,0]},
-    { "name":"C3", "bytes": [0,0,0,0,0]}
+    { "name":"C1", "bytes": [0,0,0,0,1]},
+    { "name":"C2", "bytes": [0,0,0,0,2]},
+    { "name":"C3", "bytes": [0,0,0,0,3]}
   ]
  }

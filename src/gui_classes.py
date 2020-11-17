@@ -57,11 +57,23 @@ class Commandframe(tk.Frame):
         if config['Profile'] == "../json/default.json":
             #make empty Table
             for x in range(0, 8):
-                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNE')
-                tk.Label(self, text="       ",borderwidth=2, relief="solid").grid(column=2, row=x+3, sticky='WNE')
-                tk.Label(self, text="       ",borderwidth=2, relief="solid").grid(column=3, row=x+3, sticky='WNE')
+                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNES')
+                tk.Label(self, text="       ",borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
+                tk.Label(self, text="       ",borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
         else:
-            print("PH")
+            with open(config['Profile'], "r") as read_file:
+                profile = json.loads(read_file.read())
+                read_file.close()
+            num_commands = len(profile['Commands'])
+            for x in range(0,num_commands):
+
+                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNES')
+                tk.Label(self, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
+                num_bytes = len(profile['Commands'][x]['bytes'])
+                bytes_s=""
+                for y in range(0,num_bytes):
+                    bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
+                tk.Label(self, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
     #         profile = json.loads(profile_file.read())
