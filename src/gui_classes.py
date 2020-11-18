@@ -4,7 +4,7 @@ import buttons as but
 import json
 
 filename = "../json/config.json"
-
+#****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
@@ -32,10 +32,10 @@ class SampleApp(tk.Tk):
 class Testframe(tk.Frame):
 
     def __init__(self, master):
-
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('NSEW'))
         tk.Label(master, text ="Frame Test").grid(column=1, row=1, sticky='W')
+
 
 
 class Commandframe(tk.Frame):
@@ -45,7 +45,7 @@ class Commandframe(tk.Frame):
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('WN'))
         #ttk.Separator(self,orient="vertical").grid(column=3, rowspan=3,ipady=300)
-        tk.Button(self, text="Edit Command List").grid(column=2, row=1, sticky='WN')
+        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg()).grid(column=2, row=1, sticky='WN')
         tk.Label(self, text="Command Names").grid(column=2, row=2, sticky='WN')
         tk.Label(self, text="Byte String").grid(column=3, row=2, sticky='WNN')
         #load config data
@@ -74,6 +74,16 @@ class Commandframe(tk.Frame):
                 for y in range(0,num_bytes):
                     bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
                 tk.Label(self, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
+    def popupmsg(self):
+        popup = tk.Tk()
+        popup.wm_title("!")
+        label = ttk.Label(popup, text="Test", font="NORM_FONT")
+        label.grid(column=1, row=1, sticky='WNES')
+        B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
+        B2 = ttk.Button(popup, text="Okay", command = popup.destroy)
+        B1.grid(column=1, row=2, sticky='WNES')
+        B2.grid(column=2, row=2, sticky='WNES')
+        popup.mainloop()
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
     #         profile = json.loads(profile_file.read())
@@ -135,3 +145,12 @@ class Topframe(tk.Frame):
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=2, row=4, sticky='W')
         # tk.Button(self, text="Add Bytes",
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=3, row=4, sticky='W')
+
+#****************************** Add Command Window *********************************************
+class NewWindow(tk.Frame):
+
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        master.title("New Window")
+        master.geometry("200x200")
+        tk.Label(self, text ="This is a new Window").grid(column=0, row=0, sticky='W')
