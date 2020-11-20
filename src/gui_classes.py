@@ -87,15 +87,46 @@ class Commandframe(tk.Frame):
     def popupmsg(self):
         popup = tk.Tk()
         popup.title("!")
-        label = ttk.Label(popup, text="Test", font="NORM_FONT")
-        label.grid(column=1, row=1, sticky='WNES')
-        scrollbar = ttk.Scrollbar(popup,orient=tk.HORIZONTAL)
-        scrollbar.grid(column=1, row=3, sticky='WNES')
-        name_var= tk.StringVar()
-        E1 = ttk.Entry(popup,textvariable=name_var)
-        E1.grid(column=1, row=2, sticky='WNES')
-        B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        B2 = ttk.Button(popup, text="Okay", command = popup.destroy).grid(column=1, row=5, sticky='WNES')
+        w = 500
+        h = 500
+        ws = popup.winfo_screenwidth() # width of the screen
+        hs = popup.winfo_screenheight() # height of the screen
+        popup.geometry("%dx%d+%d+%d" % (w,h,ws-3*ws/4,hs-3*hs/4))
+        # label = ttk.Label(popup, text="Test", font="NORM_FONT")
+        # label.grid(column=1, row=1, sticky='WNES')
+        # scrollbar = ttk.Scrollbar(popup,orient=tk.HORIZONTAL)
+        # scrollbar.grid(column=1, row=3, sticky='WNES')
+        # name_var= tk.StringVar()
+        # E1 = ttk.Entry(popup,textvariable=name_var)
+        # E1.grid(column=1, row=2, sticky='WNES')
+        # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
+        B2 = ttk.Button(popup, text="Apply", command = popup.destroy).grid(column=2, row=1, sticky='WNES')
+
+        config_p = {}
+        with open("../json/config.json", "r") as read_file:
+            config_p = json.loads(read_file.read())
+            read_file.close()
+        #print command table
+        if config_p['Profile'] == "../json/default.json":
+            #make empty Table
+            for x in range(0, 8):
+                print(PH)
+        else:
+            with open(config_p['Profile'], "r") as read_file:
+                profile = json.loads(read_file.read())
+                read_file.close()
+            num_commands = len(profile['Commands'])
+            for x in range(0,num_commands):
+                Ex = ttk.Entry(popup)
+                Ex.insert(0, profile['Commands'][x]['name'])
+                Ex.grid(column=1, row=x+1, sticky='WNES')
+                num_bytes = len(profile['Commands'][x]['bytes'])
+                bytes_s=""
+                for y in range(0,num_bytes):
+                    bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
+                Ey = ttk.Entry(popup)
+                Ey.insert(0, bytes_s)
+                Ey.grid(column=2, row=x+1, sticky='WNES')
         popup.mainloop()
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
