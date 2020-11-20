@@ -10,3 +10,6 @@ def write_button():
 
 def clear_button():
     print("Clear Button")
+
+def printcheck(text):
+    print(text)

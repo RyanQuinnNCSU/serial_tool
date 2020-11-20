@@ -74,15 +74,28 @@ class Commandframe(tk.Frame):
                 for y in range(0,num_bytes):
                     bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
                 tk.Label(self, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
+    # def popupmsg(self):
+    #         popup = tk.Tk()
+    #         popup.wm_title("!")
+    #         label = ttk.Label(popup, text="Test", font="NORM_FONT")
+    #         label.grid(column=1, row=1, sticky='WNES')
+    #         B1 = ttk.Button(popup, text="Okay", command =popup.destroy))
+    #         B2 = ttk.Button(popup, text="Okay", command = popup.destroy)
+    #         B1.grid(column=1, row=2, sticky='WNES')
+    #         B2.grid(column=2, row=2, sticky='WNES')
+    #         popup.mainloop()
     def popupmsg(self):
         popup = tk.Tk()
-        popup.wm_title("!")
+        popup.title("!")
         label = ttk.Label(popup, text="Test", font="NORM_FONT")
         label.grid(column=1, row=1, sticky='WNES')
-        B1 = ttk.Button(popup, text="Okay", command = popup.destroy)
-        B2 = ttk.Button(popup, text="Okay", command = popup.destroy)
-        B1.grid(column=1, row=2, sticky='WNES')
-        B2.grid(column=2, row=2, sticky='WNES')
+        scrollbar = ttk.Scrollbar(popup,orient=tk.HORIZONTAL)
+        scrollbar.grid(column=1, row=3, sticky='WNES')
+        name_var= tk.StringVar()
+        E1 = ttk.Entry(popup,textvariable=name_var)
+        E1.grid(column=1, row=2, sticky='WNES')
+        B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
+        B2 = ttk.Button(popup, text="Okay", command = popup.destroy).grid(column=1, row=5, sticky='WNES')
         popup.mainloop()
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
