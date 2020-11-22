@@ -47,35 +47,10 @@ class Commandframe(tk.Frame):
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('WN'))
         #ttk.Separator(self,orient="vertical").grid(column=3, rowspan=3,ipady=300)
-        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg()).grid(column=2, row=1, sticky='WN')
+        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg(self)).grid(column=2, row=1, sticky='WN')
         tk.Label(self, text="Command Names").grid(column=2, row=2, sticky='WN')
         tk.Label(self, text="Byte String").grid(column=3, row=2, sticky='WNN')
-        #load config data
-        config = {}
-        with open("../json/config.json", "r") as read_file:
-            config = json.loads(read_file.read())
-            read_file.close()
-        #print command table
-        if config['Profile'] == "../json/default.json":
-            #make empty Table
-            for x in range(0, 8):
-                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNES')
-                tk.Label(self, text="       ",borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
-                tk.Label(self, text="       ",borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
-        else:
-            with open(config['Profile'], "r") as read_file:
-                profile = json.loads(read_file.read())
-                read_file.close()
-            num_commands = len(profile['Commands'])
-            for x in range(0,num_commands):
-
-                tk.Button(self, text=">>").grid(column=1, row=x+3, sticky='WNES')
-                tk.Label(self, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
-                num_bytes = len(profile['Commands'][x]['bytes'])
-                bytes_s=""
-                for y in range(0,num_bytes):
-                    bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
-                tk.Label(self, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
+        self.list_commands(self)
     # def popupmsg(self):
     #         popup = tk.Tk()
     #         popup.wm_title("!")
@@ -86,7 +61,48 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
-    def popupmsg(self):
+    def list_commands(self,frame):
+            #load config data
+            config = {}
+            with open("../json/config.json", "r") as read_file:
+                config = json.loads(read_file.read())
+                read_file.close()
+            #print command table
+            if config['Profile'] == "../json/default.json":
+                #make empty Table
+                for x in range(0, 8):
+                    tk.Button(frame, text=">>").grid(column=1, row=x+3, sticky='WNES')
+                    tk.Label(frame, text="       ",borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
+                    tk.Label(frame, text="       ",borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
+            else:
+                with open(config['Profile'], "r") as read_file:
+                    profile = json.loads(read_file.read())
+                    read_file.close()
+                num_commands = len(profile['Commands'])
+                for x in range(0,num_commands):
+
+                    tk.Button(frame, text=">>").grid(column=1, row=x+3, sticky='WNES')
+                    tk.Label(frame, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
+                    num_bytes = len(profile['Commands'][x]['bytes'])
+                bytes_s=""
+                for y in range(0,num_commands):
+                    bytes_s = profile['Commands'][y]['bytes']
+                    tk.Label(frame, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=y+3, sticky='WNES')
+                    bytes_s=""
+
+    def update_command_list(self,frame,profile):
+        num_commands = len(profile['Commands'])
+        for x in range(0,num_commands):
+
+            tk.Button(frame, text=">>").grid(column=1, row=x+3, sticky='WNES')
+            tk.Label(frame, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
+            num_bytes = len(profile['Commands'][x]['bytes'])
+        bytes_s=""
+        for y in range(0,num_commands):
+            bytes_s = profile['Commands'][y]['bytes']
+            tk.Label(frame, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
+            bytes_s=""
+    def popupmsg(self,frame):
         global unsaved_profile
         popup = tk.Tk()
         popup.title("!")
@@ -105,7 +121,7 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(entry_CN_list,entry_byte_list,profile)).grid(column=2, row=1, sticky='WNES')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame) ).grid(column=2, row=1, sticky='WNES')
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -124,15 +140,12 @@ class Commandframe(tk.Frame):
                 read_file.close()
             num_commands = len(profile['Commands'])
             for x in range(0,num_commands):
-                Ex = ttk.Entry(popup)
+                Ex = ttk.Entry(popup,width=30)
                 Ex.insert(0, profile['Commands'][x]['name'])
                 Ex.grid(column=1, row=x+2, sticky='WNES')
                 entry_CN_list.append(Ex)
-                num_bytes = len(profile['Commands'][x]['bytes'])
-                bytes_s=""
-                for y in range(0,num_bytes):
-                    bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
-                Ey = ttk.Entry(popup)
+                bytes_s = profile['Commands'][x]['bytes']
+                Ey = ttk.Entry(popup,width=30)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=2, row=x+2, sticky='WNES')
                 entry_byte_list.append(Ey)
@@ -152,15 +165,25 @@ class Commandframe(tk.Frame):
         Ey.grid(column=2, row=num_commands+1, sticky='WNES')
         add_button.grid(column=1, row=num_commands+2, sticky='WNES')
         entry_byte_list.append(Ey)
+        empty_command = { "name":"", "bytes": ""}
+        unsaved_profile['Commands'].append(empty_command)
 
 
-    def store_entries(self, comm_name_list, bytes_list, profile):
-            print("button pressed")
-
-            for entry in comm_name_list:
-                print(entry.get())
-
-
+    def store_entries(self,frame):
+            global unsaved_profile
+            global entry_CN_list
+            global entry_byte_list
+            print("Store Entries")
+            x=0
+            for entry in entry_CN_list:
+                unsaved_profile['Commands'][x]['name'] = entry.get()
+                x+=1
+            y=0
+            for entry in entry_byte_list:
+                unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                y+=1
+            self.update_command_list(frame,unsaved_profile)
+            #print(unsaved_profile)
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
     #         profile = json.loads(profile_file.read())
@@ -207,6 +230,9 @@ class Topframe(tk.Frame):
         self.grid(column=0, row=0, sticky=('EW'))
         master.state('zoomed')
         #Button Ribbon
+        tk.Button(self, text="TMP Save",
+                  command=lambda : self.temp_save_button() ).grid(column=1, row=1, sticky='W')
+
         tk.Button(self, text="Play Script",
                   command=but.play_button).grid(column=1, row=2, sticky='W')
         tk.Button(self, text="Loop",
@@ -222,6 +248,15 @@ class Topframe(tk.Frame):
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=2, row=4, sticky='W')
         # tk.Button(self, text="Add Bytes",
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=3, row=4, sticky='W')
+    def temp_save_button(self):
+        config = {}
+        with open("../json/config.json", "r") as read_file:
+            config = json.loads(read_file.read())
+            read_file.close()
+        with open(config['Profile'], "w") as write_file:
+            json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
+            write_file.close()
+
 
 #****************************** Add Command Window *********************************************
 class NewWindow(tk.Frame):

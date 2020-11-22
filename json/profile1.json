@@ -1,10 +1,31 @@
 {
-  "Pofile_name": "Profile 1",
-  "Com Port": "COM 11",
-  "Num_Commands": 3,
-  "Commands": [
-    { "name":"C1", "bytes": [0,0,0,0,1]},
-    { "name":"C2", "bytes": [0,0,0,0,2]},
-    { "name":"C3", "bytes": [0,0,0,0,3]}
-  ]
- }
+    "Pofile_name": "Profile 1",
+    "Com Port": "COM 11",
+    "Num_Commands": 6,
+    "Commands": [
+        {
+            "name": "C1",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C2",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C3",
+            "bytes": "0x00 0x00 0x00 0x00 0x03 "
+        },
+        {
+            "name": "C4",
+            "bytes": "0x00 0x00 0x00 0x00 0x04"
+        },
+        {
+            "name": "C5",
+            "bytes": "0x00 0x00 0x00 0x00 0x05"
+        },
+        {
+            "name": "C6",
+            "bytes": "0x00 0x00 0x00 0x00 0x05"
+        }
+    ]
+}
