@@ -87,6 +87,8 @@ class Commandframe(tk.Frame):
     def popupmsg(self):
         popup = tk.Tk()
         popup.title("!")
+        entry_CN_list = []
+        entry_byte_list =[]
         w = 500
         h = 500
         ws = popup.winfo_screenwidth() # width of the screen
@@ -100,7 +102,7 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        B2 = ttk.Button(popup, text="Apply", command = popup.destroy).grid(column=2, row=1, sticky='WNES')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(entry_CN_list,entry_byte_list)).grid(column=2, row=1, sticky='WNES')
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -119,15 +121,25 @@ class Commandframe(tk.Frame):
             for x in range(0,num_commands):
                 Ex = ttk.Entry(popup)
                 Ex.insert(0, profile['Commands'][x]['name'])
-                Ex.grid(column=1, row=x+1, sticky='WNES')
+                Ex.grid(column=1, row=x+2, sticky='WNES')
+                entry_CN_list.append(Ex)
                 num_bytes = len(profile['Commands'][x]['bytes'])
                 bytes_s=""
                 for y in range(0,num_bytes):
                     bytes_s += str(profile['Commands'][x]['bytes'][y]) + " "
                 Ey = ttk.Entry(popup)
                 Ey.insert(0, bytes_s)
-                Ey.grid(column=2, row=x+1, sticky='WNES')
+                Ey.grid(column=2, row=x+2, sticky='WNES')
+                entry_byte_list.append(Ey)
+
         popup.mainloop()
+
+    def store_entries(self, comm_name_list, bytes_list):
+            print("button pressed")
+            for entry in comm_name_list:
+                print(entry.get())
+
+
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
     #         profile = json.loads(profile_file.read())

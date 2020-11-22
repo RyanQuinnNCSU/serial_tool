@@ -1,1 +1,1 @@
-{"Profile": "../json/profile1.json", "COM List": ["COM11: Silicon Labs CP210x USB to UART Bridge ", "COM3: Intel(R) Active Management Technology - SOL ", "COM1: Communications Port ", "COM13: Silicon Labs CP210x USB to UART Bridge "], "Selected Port": "None"}
+{"Profile": "../json/profile1.json", "COM List": ["COM3: Intel(R) Active Management Technology - SOL ", "COM1: Communications Port "], "Selected Port": "None"}
