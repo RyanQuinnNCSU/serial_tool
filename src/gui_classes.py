@@ -4,6 +4,9 @@ import buttons as but
 import json
 
 filename = "../json/config.json"
+unsaved_profile={}
+entry_CN_list = []
+entry_byte_list = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -41,7 +44,6 @@ class Testframe(tk.Frame):
 class Commandframe(tk.Frame):
 
     def __init__(self, master):
-
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('WN'))
         #ttk.Separator(self,orient="vertical").grid(column=3, rowspan=3,ipady=300)
@@ -85,10 +87,11 @@ class Commandframe(tk.Frame):
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
     def popupmsg(self):
+        global unsaved_profile
         popup = tk.Tk()
         popup.title("!")
-        entry_CN_list = []
-        entry_byte_list =[]
+        profile = {}
+        num_commands=0
         w = 500
         h = 500
         ws = popup.winfo_screenwidth() # width of the screen
@@ -102,7 +105,7 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(entry_CN_list,entry_byte_list)).grid(column=2, row=1, sticky='WNES')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(entry_CN_list,entry_byte_list,profile)).grid(column=2, row=1, sticky='WNES')
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -116,6 +119,8 @@ class Commandframe(tk.Frame):
         else:
             with open(config_p['Profile'], "r") as read_file:
                 profile = json.loads(read_file.read())
+                unsaved_profile=profile.copy()
+                #print("num commands = %d",unsaved_profile['Num_Commands'])
                 read_file.close()
             num_commands = len(profile['Commands'])
             for x in range(0,num_commands):
@@ -131,11 +136,27 @@ class Commandframe(tk.Frame):
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=2, row=x+2, sticky='WNES')
                 entry_byte_list.append(Ey)
+            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
+            add_button.grid(column=1, row=num_commands+2, sticky='WNES')
 
         popup.mainloop()
 
-    def store_entries(self, comm_name_list, bytes_list):
+    def add_command(self, popup, add_button):
+        global unsaved_profile
+        unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
+        num_commands = unsaved_profile['Num_Commands']
+        Ex = ttk.Entry(popup)
+        Ex.grid(column=1, row=num_commands+1, sticky='WNES')
+        entry_CN_list.append(Ex)
+        Ey = ttk.Entry(popup)
+        Ey.grid(column=2, row=num_commands+1, sticky='WNES')
+        add_button.grid(column=1, row=num_commands+2, sticky='WNES')
+        entry_byte_list.append(Ey)
+
+
+    def store_entries(self, comm_name_list, bytes_list, profile):
             print("button pressed")
+
             for entry in comm_name_list:
                 print(entry.get())
 
