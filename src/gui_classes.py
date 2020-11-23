@@ -7,6 +7,7 @@ filename = "../json/config.json"
 unsaved_profile={}
 entry_CN_list = []
 entry_byte_list = []
+remove_but_list = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -102,6 +103,7 @@ class Commandframe(tk.Frame):
             bytes_s = profile['Commands'][y]['bytes']
             tk.Label(frame, text=bytes_s,borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
             bytes_s=""
+
     def popupmsg(self,frame):
         global unsaved_profile
         popup = tk.Tk()
@@ -140,29 +142,54 @@ class Commandframe(tk.Frame):
                 read_file.close()
             num_commands = len(profile['Commands'])
             for x in range(0,num_commands):
+                index = x
+                remove_button = ttk.Button(popup, text="-", command =lambda index=index:  self.remove_command(popup,index) ).grid(column=1, row=x+2, sticky='WNES')
+                remove_but_list.append(remove_button)
                 Ex = ttk.Entry(popup,width=30)
                 Ex.insert(0, profile['Commands'][x]['name'])
-                Ex.grid(column=1, row=x+2, sticky='WNES')
+                Ex.grid(column=2, row=x+2, sticky='WNES')
                 entry_CN_list.append(Ex)
                 bytes_s = profile['Commands'][x]['bytes']
                 Ey = ttk.Entry(popup,width=30)
                 Ey.insert(0, bytes_s)
-                Ey.grid(column=2, row=x+2, sticky='WNES')
+                Ey.grid(column=3, row=x+2, sticky='WNES')
                 entry_byte_list.append(Ey)
             add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
-            add_button.grid(column=1, row=num_commands+2, sticky='WNES')
+            add_button.grid(column=2, row=num_commands+2, sticky='WNES')
 
         popup.mainloop()
+
+
+    def remove_command(self,popup,index):
+        #See if command being deleted is in the current profile.
+        with open("../json/config.json", "r") as read_file:
+            config_p = json.loads(read_file.read())
+            read_file.close()
+        if config_p['Profile'] != "../json/default.json":
+            with open(config_p['Profile'], "r") as read_file:
+                profile = json.loads(read_file.read())
+                read_file.close()
+            num_commands = len(profile['Commands'])
+            if(index < num_commands): #command is in current profile
+                profile['Commands'].pop(index)
+        print(profile['Commands'])
+        #See if command is being deleted is in the unsaved profile
+        num_commands = len(unsaved_profile['Commands'])
+        if(index < num_commands): #command is in current profile
+            unsaved_profile['Commands'].pop(index)
+            print(profile['Commands'])
 
     def add_command(self, popup, add_button):
         global unsaved_profile
         unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
         num_commands = unsaved_profile['Num_Commands']
+        remove_button = ttk.Button(popup, text="-", command =lambda :  self.remove_command(popup,num_commands+1) ).grid(column=1, row=num_commands+1, sticky='WNES')
+        remove_but_list.append(remove_button)
         Ex = ttk.Entry(popup)
-        Ex.grid(column=1, row=num_commands+1, sticky='WNES')
+        Ex.grid(column=2, row=num_commands+1, sticky='WNES')
         entry_CN_list.append(Ex)
         Ey = ttk.Entry(popup)
-        Ey.grid(column=2, row=num_commands+1, sticky='WNES')
+        Ey.grid(column=3, row=num_commands+1, sticky='WNES')
         add_button.grid(column=1, row=num_commands+2, sticky='WNES')
         entry_byte_list.append(Ey)
         empty_command = { "name":"", "bytes": ""}
