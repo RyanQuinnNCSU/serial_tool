@@ -2,9 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 import buttons as but
 import json
+import serial_functions as SF
 
 filename = "../json/config.json"
 unsaved_profile={}
+unsaved_config={}
 entry_CN_list = []
 entry_byte_list = []
 remove_but_list = []
@@ -333,6 +335,7 @@ class Transactionframe(tk.Frame):
 class Optionsframe(tk.Frame):
 
     def __init__(self, master):
+        global unsaved_config
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
         #load config data
@@ -340,9 +343,25 @@ class Optionsframe(tk.Frame):
         with open("../json/config.json", "r") as read_file:
             config = json.loads(read_file.read())
             read_file.close()
+        unsaved_config = config
         COM_v = tk.StringVar(self)
         COM_v.set("COM Port")
-        COM_drop = tk.OptionMenu(self, COM_v, *config['COM List'])
+        #Setup Com Port Drop Down Menu.
+        COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
+        COM_drop.config(width=90, font=('Helvetica', 12))
+        COM_drop.grid(column=1, row=1, sticky='W')
+        #Setup Com Port Refresh button
+        refresh = tk.Button(self, text="Refesh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
+        refresh.grid(column=2, row=1, sticky='E')
+
+    def check_COMs(self,frame,COM_drop,COM_v):
+        global unsaved_config
+        SF.list_ports()
+        with open("../json/config.json", "r") as read_file:
+            unsaved_config = json.loads(read_file.read())
+            read_file.close()
+        COM_drop.grid_forget()
+        COM_drop = tk.OptionMenu(frame, COM_v, *unsaved_config['COM List'])
         COM_drop.config(width=90, font=('Helvetica', 12))
         COM_drop.grid(column=1, row=1, sticky='W')
 

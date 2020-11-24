@@ -13,7 +13,9 @@ def list_ports():
             config = json.loads(read_file.read())
             read_file.close()
         config['COM List'] = [] # clear com port list.
+        iterator = 0
         for port in ports:
+            iterator+=1
             device_name = port.description
             end_of_discription = device_name.find("(COM")
 
@@ -31,6 +33,8 @@ def list_ports():
             #     COM_port = device_name[start:end]
             #     print(COM_port)
             config['COM List'].append(comport_s + ": " + discription) # device name hear.
+        if(iterator == 0):
+            config['COM List'].append("No Devices Detected") # device name hear.
         print(config)
         with open("../json/config.json", "w") as write_file:
             json.dump(config, write_file)
