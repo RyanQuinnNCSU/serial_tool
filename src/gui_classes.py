@@ -267,7 +267,7 @@ class Commandframe(tk.Frame):
         global unsaved_profile
         unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
         num_commands = unsaved_profile['Num_Commands']
-        remove_button = ttk.Button(popup, text="-", command =lambda :  self.remove_command(popup,num_commands+1) )
+        remove_button = ttk.Button(popup, text="-", command =lambda :  self.remove_command(popup,num_commands+1,add_button) )
         remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
         remove_but_list.append(remove_button)
         Ex = ttk.Entry(popup)

@@ -1,7 +1,7 @@
 {
     "Pofile_name": "Profile 1",
     "Com Port": "COM 11",
-    "Num_Commands": 6,
+    "Num_Commands": 3,
     "Commands": [
         {
             "name": "C1",
