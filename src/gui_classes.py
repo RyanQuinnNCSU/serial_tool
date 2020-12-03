@@ -154,7 +154,27 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame) ).grid(column=2, row=1, sticky='WNES')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame) ).grid(column=1, row=1, sticky='WNS')
+
+        frame_canvas = tk.Frame(popup)
+        frame_canvas.grid(row=2, column=1, pady=(5, 0), sticky='nw')
+        frame_canvas.grid_rowconfigure(0, weight=1)
+        frame_canvas.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas.grid(row=0, column=0, sticky="news")
+
+        # Link a scrollbar to the canvas
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        vsb.grid(row=0, column=1, sticky='ns')
+        canvas.configure(yscrollcommand=vsb.set)
+
+        # Create a frame to contain the buttons
+        frame_entries = tk.Frame(canvas)
+        canvas.create_window((0, 0), window=frame_entries, anchor='nw')
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -173,21 +193,31 @@ class Commandframe(tk.Frame):
                 read_file.close()
             num_commands = len(profile['Commands'])
             add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
-            add_button.grid(column=2, row=num_commands+2, sticky='WNES')
+            add_button.grid(column=1, row=3, sticky='WNES')
             for x in range(0,num_commands):
                 index = x
-                remove_button = ttk.Button(popup, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
-                remove_button.grid(column=1, row=x+2, sticky='WNES')
+                remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
+                remove_button.grid(column=1, row=x, sticky='WNES')
                 remove_but_list.append(remove_button)
-                Ex = ttk.Entry(popup,width=30)
+                Ex = ttk.Entry(frame_entries,width=30)
                 Ex.insert(0, profile['Commands'][x]['name'])
-                Ex.grid(column=2, row=x+2, sticky='WNES')
+                Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list.append(Ex)
                 bytes_s = profile['Commands'][x]['bytes']
-                Ey = ttk.Entry(popup,width=30)
+                Ey = ttk.Entry(frame_entries,width=30)
                 Ey.insert(0, bytes_s)
-                Ey.grid(column=3, row=x+2, sticky='WNES')
+                Ey.grid(column=3, row=x, sticky='WNES')
                 entry_byte_list.append(Ey)
+        frame_entries.update_idletasks()
+
+        columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
+        rows_height = remove_but_list[0].winfo_height() * num_commands
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        # Set the canvas scrolling region
+
+
+
+        canvas.config(scrollregion=canvas.bbox("all"))
 
 
         popup.mainloop()
