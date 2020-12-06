@@ -167,10 +167,7 @@ class Commandframe(tk.Frame):
         canvas = tk.Canvas(frame_canvas, bg="yellow")
         canvas.grid(row=0, column=0, sticky="news")
 
-        # Link a scrollbar to the canvas
-        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
-        vsb.grid(row=0, column=1, sticky='ns')
-        canvas.configure(yscrollcommand=vsb.set)
+
 
         # Create a frame to contain the buttons
         frame_entries = tk.Frame(canvas)
@@ -192,6 +189,12 @@ class Commandframe(tk.Frame):
                 #print("num commands = %d",unsaved_profile['Num_Commands'])
                 read_file.close()
             num_commands = len(profile['Commands'])
+            # Link a scrollbar to the canvas
+            vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+            vsb.grid(row=0, column=1, sticky='ns')
+            vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+            vsb2.grid(row=num_commands, column=0, sticky='ew')
+            canvas.configure(yscrollcommand=vsb.set,xscrollcommand=vsb2.set)
             add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
             add_button.grid(column=1, row=3, sticky='WNES')
             for w in range (0,num_commands):
@@ -218,7 +221,10 @@ class Commandframe(tk.Frame):
         frame_entries.update_idletasks()
 
         columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
-        rows_height = remove_but_list[0].winfo_height() * num_commands
+        if(num_commands <= 15):
+            rows_height = remove_but_list[0].winfo_height() * (num_commands+1) 
+        else:
+            rows_height = remove_but_list[0].winfo_height() * 16
         frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         # Set the canvas scrolling region
 
