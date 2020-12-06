@@ -266,23 +266,27 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         #See if command being deleted is in the current profile.
-        with open("../json/config.json", "r") as read_file:
-            config_p = json.loads(read_file.read())
-            read_file.close()
-        if config_p['Profile'] != "../json/default.json":
-            with open(config_p['Profile'], "r") as read_file:
-                profile = json.loads(read_file.read())
-                read_file.close()
-            num_commands = len(profile['Commands'])
-            if(index < num_commands): #command is in current profile
-                profile['Commands'].pop(index)
-                profile['Num_Commands'] = num_commands-1
+        # with open("../json/config.json", "r") as read_file:
+        #     config_p = json.loads(read_file.read())
+        #     read_file.close()
+        # if config_p['Profile'] != "../json/default.json":
+        #     with open(config_p['Profile'], "r") as read_file:
+        #         profile = json.loads(read_file.read())
+        #         read_file.close()
+        #     num_commands = len(profile['Commands'])
+        #     if(index < num_commands): #command is in current profile
+        #         profile['Commands'].pop(index)
+        #         profile['Num_Commands'] = num_commands-1
+
+
         #print(profile['Commands'])
         #See if command is being deleted is in the unsaved profile
         num_commands = len(unsaved_profile['Commands'])
-        if(index < num_commands): #command is in current profile
-            unsaved_profile['Commands'].pop(index)
-            unsaved_profile['Num_Commands'] = num_commands-1
+        #if(index < num_commands): #command is in current profile
+        print(index)
+        unsaved_profile['Commands'].pop(index)
+        unsaved_profile['Num_Commands'] = num_commands-1
+
             #print(unsaved_profile['Commands'])
         #remove command widgets
         for x in range(0,len(remove_but_list)):
@@ -293,6 +297,9 @@ class Commandframe(tk.Frame):
         #remove_but_list *= 0
         #entry_CN_list*= 0
         #entry_byte_list*= 0
+        remove_but_list.pop(index)
+        entry_CN_list.pop(index)
+        entry_byte_list.pop(index)
         #reset command widgets
         self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
 
