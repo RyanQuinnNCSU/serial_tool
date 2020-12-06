@@ -192,22 +192,29 @@ class Commandframe(tk.Frame):
                 #print("num commands = %d",unsaved_profile['Num_Commands'])
                 read_file.close()
             num_commands = len(profile['Commands'])
-            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
+            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
             add_button.grid(column=1, row=3, sticky='WNES')
+            for w in range (0,num_commands):
+                remove_button_ph = ttk.Button(frame_entries)
+                remove_but_list.append(remove_button_ph)
+                Ex_ph = ttk.Entry(frame_entries,width=30)
+                entry_CN_list.append(Ex_ph)
+                Ey_ph = ttk.Entry(frame_entries,width=30)
+                entry_byte_list.append(Ey_ph)
             for x in range(0,num_commands):
                 index = x
-                remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
+                remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
                 remove_button.grid(column=1, row=x, sticky='WNES')
-                remove_but_list.append(remove_button)
+                remove_but_list[x] = remove_button
                 Ex = ttk.Entry(frame_entries,width=30)
                 Ex.insert(0, profile['Commands'][x]['name'])
                 Ex.grid(column=2, row=x, sticky='WNES')
-                entry_CN_list.append(Ex)
+                entry_CN_list[x] = Ex
                 bytes_s = profile['Commands'][x]['bytes']
                 Ey = ttk.Entry(frame_entries,width=30)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
-                entry_byte_list.append(Ey)
+                entry_byte_list[x] = Ey
         frame_entries.update_idletasks()
 
         columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
@@ -222,33 +229,36 @@ class Commandframe(tk.Frame):
 
         popup.mainloop()
 
-    def update_command_entries(self,popup,profile):
+    def update_command_entries(self,popup,frame_entries,frame_canvas,vsb,profile):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
         global label_CN_list
         global label_byte_list
         global play_but_list
+        print(len(remove_but_list))
         num_commands = len(profile['Commands'])
-        add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
-        add_button.grid(column=2, row=num_commands+2, sticky='WNES')
         for x in range(0,num_commands):
             index = x
-            remove_button = ttk.Button(popup, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
-            remove_button.grid(column=1, row=x+2, sticky='WNES')
-            remove_but_list.append(remove_button)
-            Ex = ttk.Entry(popup,width=30)
+            remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
+            remove_button.grid(column=1, row=x, sticky='WNES')
+            remove_but_list[x] = remove_button
+            Ex = ttk.Entry(frame_entries,width=30)
             Ex.insert(0, profile['Commands'][x]['name'])
-            Ex.grid(column=2, row=x+2, sticky='WNES')
-            entry_CN_list.append(Ex)
+            Ex.grid(column=2, row=x, sticky='WNES')
+            entry_CN_list[x] = Ex
             bytes_s = profile['Commands'][x]['bytes']
-            Ey = ttk.Entry(popup,width=30)
+            Ey = ttk.Entry(frame_entries,width=30)
             Ey.insert(0, bytes_s)
-            Ey.grid(column=3, row=x+2, sticky='WNES')
-            entry_byte_list.append(Ey)
+            Ey.grid(column=3, row=x, sticky='WNES')
+            entry_byte_list[x] = Ey
+        frame_entries.update_idletasks()
 
+        columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
+        rows_height = remove_but_list[0].winfo_height() * num_commands
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
 
-    def remove_command(self,popup,index,add_button):
+    def remove_command(self,popup,frame_entries,frame_canvas,index,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -279,15 +289,14 @@ class Commandframe(tk.Frame):
             remove_but_list[x].grid_forget()
             entry_CN_list[x].grid_forget()
             entry_byte_list[x].grid_forget()
-        add_button.grid_forget()
-        #clear widget list
-        remove_but_list *= 0
-        entry_CN_list*= 0
-        entry_byte_list*= 0
+        ##clear widget list
+        #remove_but_list *= 0
+        #entry_CN_list*= 0
+        #entry_byte_list*= 0
         #reset command widgets
-        self.update_command_entries(popup,unsaved_profile)
+        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
 
-    def add_command(self, popup, add_button):
+    def add_command(self, popup,frame_entries,frame_canvas,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -296,19 +305,28 @@ class Commandframe(tk.Frame):
         global play_but_list
         global unsaved_profile
         unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
-        num_commands = unsaved_profile['Num_Commands']
-        remove_button = ttk.Button(popup, text="-", command =lambda :  self.remove_command(popup,num_commands+1,add_button) )
-        remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
-        remove_but_list.append(remove_button)
-        Ex = ttk.Entry(popup)
-        Ex.grid(column=2, row=num_commands+1, sticky='WNES')
-        entry_CN_list.append(Ex)
-        Ey = ttk.Entry(popup)
-        Ey.grid(column=3, row=num_commands+1, sticky='WNES')
-        add_button.grid(column=1, row=num_commands+2, sticky='WNES')
-        entry_byte_list.append(Ey)
+        # num_commands = unsaved_profile['Num_Commands']
+        # remove_button = ttk.Button(frame_entries, text="-", command =lambda :  self.remove_command(popup,num_commands+1,add_button) )
+        # remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
+        # remove_but_list.append(remove_button)
+        # Ex = ttk.Entry(frame_entries)
+        # Ex.grid(column=2, row=num_commands, sticky='WNES')
+        # entry_CN_list.append(Ex)
+        # Ey = ttk.Entry(frame_entries)
+        # Ey.grid(column=3, row=num_commands, sticky='WNES')
+        # add_button.grid(column=1, row=num_commands+2, sticky='WNES')
+        # entry_byte_list.append(Ey)
+        #append to global button and entry list_ports
+        remove_button_ph = ttk.Button(frame_entries)
+        remove_but_list.append(remove_button_ph)
+        Ex_ph = ttk.Entry(frame_entries,width=30)
+        entry_CN_list.append(Ex_ph)
+        Ey_ph = ttk.Entry(frame_entries,width=30)
+        entry_byte_list.append(Ey_ph)
         empty_command = { "name":"", "bytes": ""}
         unsaved_profile['Commands'].append(empty_command)
+        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
+
 
 
     def store_entries(self,frame):
