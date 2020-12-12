@@ -13,6 +13,7 @@ remove_but_list = []
 label_CN_list = []
 label_byte_list = []
 play_but_list = []
+canvas_list = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -205,10 +206,11 @@ class Commandframe(tk.Frame):
         # Add a canvas in that frame
         canvas = tk.Canvas(frame_canvas, bg="yellow")
         canvas.grid(row=0, column=0, sticky="news")
-
+        canvas_list.append(canvas)
         # Create a frame to contain the buttons
         frame_entries = tk.Frame(canvas)
-        canvas.create_window((0, 0), window=frame_entries, anchor='nw')
+        id = canvas.create_window((0, 0), window=frame_entries, anchor='nw')
+        canvas_list.append(id)
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -291,7 +293,7 @@ class Commandframe(tk.Frame):
             Ex.grid(column=2, row=x, sticky='WNES')
             entry_CN_list[x] = Ex
             bytes_s = profile['Commands'][x]['bytes']
-            Ey = ttk.Entry(frame_entries,width=30)
+            Ey = ttk.Entry(frame_entries,width=80)
             Ey.insert(0, bytes_s)
             Ey.grid(column=3, row=x, sticky='WNES')
             entry_byte_list[x] = Ey
@@ -299,10 +301,13 @@ class Commandframe(tk.Frame):
 
         columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
         if(num_commands <= 15):
-            rows_height = remove_but_list[0].winfo_height() * (num_commands+1)
+            rows_height = remove_but_list[0].winfo_height() * (num_commands)
         else:
             rows_height = remove_but_list[0].winfo_height() * 16
+        window_height = remove_but_list[0].winfo_height() * (num_commands)
         frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        canvas_list[0].itemconfig(canvas_list[1],height=window_height)
+        canvas_list[0].configure(scrollregion=canvas_list[0].bbox("all"))
 
     def remove_command(self,popup,frame_entries,frame_canvas,index,vsb):
         global entry_CN_list
