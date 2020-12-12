@@ -140,6 +140,7 @@ class Commandframe(tk.Frame):
                 else:
                     rows_height = label_byte_list[0].winfo_height() * 16
                 frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+                canvas.config(scrollregion=canvas.bbox("all"))
 
     def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels):
         global entry_CN_list
