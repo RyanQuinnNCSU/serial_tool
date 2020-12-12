@@ -114,9 +114,9 @@ class Commandframe(tk.Frame):
                 num_commands = len(profile['Commands'])
                 vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
                 vsb.grid(row=0, column=1, sticky='ns')
-                vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
-                vsb2.grid(row=num_commands, column=0, sticky='ew')
-                canvas.configure(yscrollcommand=vsb.set,xscrollcommand=vsb2.set)
+                #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+                #vsb2.grid(row=num_commands, column=0, sticky='ew')
+                canvas.configure(yscrollcommand=vsb.set)
                 for x in range(0,num_commands):
                     B_P = tk.Button(frame_labels, text=">>")
                     B_P.grid(column=1, row=x+3, sticky='WNES')
@@ -180,7 +180,7 @@ class Commandframe(tk.Frame):
         popup.title("!")
         profile = {}
         num_commands=0
-        w = 500
+        w = 800
         h = 500
         ws = popup.winfo_screenwidth() # width of the screen
         hs = popup.winfo_screenheight() # height of the screen
@@ -229,9 +229,9 @@ class Commandframe(tk.Frame):
             # Link a scrollbar to the canvas
             vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
             vsb.grid(row=0, column=1, sticky='ns')
-            vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
-            vsb2.grid(row=num_commands, column=0, sticky='ew')
-            canvas.configure(yscrollcommand=vsb.set,xscrollcommand=vsb2.set)
+            #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+            #vsb2.grid(row=num_commands, column=0, sticky='ew')
+            canvas.configure(yscrollcommand=vsb.set)
             add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
             add_button.grid(column=1, row=3, sticky='WNES')
             for w in range (0,num_commands):
@@ -239,7 +239,7 @@ class Commandframe(tk.Frame):
                 remove_but_list.append(remove_button_ph)
                 Ex_ph = ttk.Entry(frame_entries,width=30)
                 entry_CN_list.append(Ex_ph)
-                Ey_ph = ttk.Entry(frame_entries,width=30)
+                Ey_ph = ttk.Entry(frame_entries,width=80)
                 entry_byte_list.append(Ey_ph)
             for x in range(0,num_commands):
                 index = x
@@ -251,7 +251,7 @@ class Commandframe(tk.Frame):
                 Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list[x] = Ex
                 bytes_s = profile['Commands'][x]['bytes']
-                Ey = ttk.Entry(frame_entries,width=30)
+                Ey = ttk.Entry(frame_entries,width=80)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
                 entry_byte_list[x] = Ey
@@ -259,7 +259,7 @@ class Commandframe(tk.Frame):
 
         columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
         if(num_commands <= 15):
-            rows_height = remove_but_list[0].winfo_height() * (num_commands+1)
+            rows_height = remove_but_list[0].winfo_height() * (num_commands)
         else:
             rows_height = remove_but_list[0].winfo_height() * 16
         frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
