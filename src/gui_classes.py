@@ -113,6 +113,7 @@ class Commandframe(tk.Frame):
                     profile = json.loads(read_file.read())
                     read_file.close()
                 num_commands = len(profile['Commands'])
+                print("Number of Commands " + str(num_commands) )
                 vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
                 vsb.grid(row=0, column=1, sticky='ns')
                 #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
@@ -178,6 +179,13 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         global unsaved_profile
+        #clear data from previous iterations
+
+        remove_but_list*= 0
+        entry_CN_list*= 0
+        entry_byte_list*= 0
+
+
         popup = tk.Tk()
         popup.title("!")
         profile = {}
@@ -223,12 +231,16 @@ class Commandframe(tk.Frame):
             for x in range(0, 8):
                 print(PH)
         else:
-            with open(config_p['Profile'], "r") as read_file:
-                profile = json.loads(read_file.read())
-                unsaved_profile=profile.copy()
-                #print("num commands = %d",unsaved_profile['Num_Commands'])
-                read_file.close()
-            num_commands = len(profile['Commands'])
+            if not bool(unsaved_profile):
+                with open(config_p['Profile'], "r") as read_file:
+                    profile = json.loads(read_file.read())
+                    unsaved_profile=profile.copy()
+                    #print("num commands = %d",unsaved_profile['Num_Commands'])
+                    read_file.close()
+                num_commands = len(profile['Commands'])
+            else:
+                num_commands = len(unsaved_profile['Commands'])
+
             # Link a scrollbar to the canvas
             vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
             vsb.grid(row=0, column=1, sticky='ns')
@@ -250,10 +262,10 @@ class Commandframe(tk.Frame):
                 remove_button.grid(column=1, row=x, sticky='WNES')
                 remove_but_list[x] = remove_button
                 Ex = ttk.Entry(frame_entries,width=30)
-                Ex.insert(0, profile['Commands'][x]['name'])
+                Ex.insert(0, unsaved_profile['Commands'][x]['name'])
                 Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list[x] = Ex
-                bytes_s = profile['Commands'][x]['bytes']
+                bytes_s = unsaved_profile['Commands'][x]['bytes']
                 Ey = ttk.Entry(frame_entries,width=80)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
@@ -282,7 +294,7 @@ class Commandframe(tk.Frame):
         global label_CN_list
         global label_byte_list
         global play_but_list
-        print(len(remove_but_list))
+        print("update_command_entries "+str(len(remove_but_list)) )
         num_commands = len(profile['Commands'])
         for x in range(0,num_commands):
             index = x
@@ -335,7 +347,7 @@ class Commandframe(tk.Frame):
         #See if command is being deleted is in the unsaved profile
         num_commands = len(unsaved_profile['Commands'])
         #if(index < num_commands): #command is in current profile
-        print(index)
+        print("remove_command" + str(index))
         unsaved_profile['Commands'].pop(index)
         unsaved_profile['Num_Commands'] = num_commands-1
 
@@ -396,8 +408,8 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
-            print("Store Entries")
-            print(unsaved_profile['Num_Commands'])
+            #print("Store Entries")
+            print("store_entries " + str(unsaved_profile['Num_Commands']) )
             x=0
             for entry in entry_CN_list:
                 unsaved_profile['Commands'][x]['name'] = entry.get()
