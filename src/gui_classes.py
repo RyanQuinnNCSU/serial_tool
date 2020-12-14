@@ -14,6 +14,7 @@ label_CN_list = []
 label_byte_list = []
 play_but_list = []
 canvas_list = []
+canvas_command_list = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -65,15 +66,14 @@ class Commandframe(tk.Frame):
         # Add a canvas in that frame
         canvas = tk.Canvas(frame_canvas, bg="yellow")
         canvas.grid(row=0, column=0, sticky="news")
-
+        canvas_command_list.append(canvas)
         # Create a frame to contain the buttons
         frame_labels = tk.Frame(canvas)
-        canvas.create_window((0, 0), window=frame_labels, anchor='nw')
-
-
-        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg(self,frame_canvas,canvas,frame_labels)).grid(column=0, row=1, sticky='WN')
-
-        self.list_commands(self,frame_canvas,canvas,frame_labels)
+        id= canvas.create_window((0, 0), window=frame_labels, anchor='nw')
+        canvas_command_list.append(id)
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg(self,frame_canvas,canvas,frame_labels,vsb)).grid(column=0, row=1, sticky='WN')
+        self.list_commands(self,frame_canvas,canvas,frame_labels,vsb)
     # def popupmsg(self):
     #         popup = tk.Tk()
     #         popup.wm_title("!")
@@ -84,16 +84,13 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
-    def list_commands(self,frame,frame_canvas,canvas,frame_labels):
+    def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
             global remove_but_list
             global label_CN_list
             global label_byte_list
             global play_but_list
-
-
-
             #load config data
             config = {}
             with open("../json/config.json", "r") as read_file:
@@ -114,7 +111,7 @@ class Commandframe(tk.Frame):
                     read_file.close()
                 num_commands = len(profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
-                vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+
                 vsb.grid(row=0, column=1, sticky='ns')
                 #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
                 #vsb2.grid(row=num_commands, column=0, sticky='ew')
@@ -140,10 +137,12 @@ class Commandframe(tk.Frame):
                     rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
                 else:
                     rows_height = label_byte_list[0].winfo_height() * 16
+                print("list_commands columns_width" + str(columns_width))
+                print("list_commands rows_height " + str(rows_height))
                 frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
                 canvas.config(scrollregion=canvas.bbox("all"))
 
-    def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels):
+    def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -151,27 +150,46 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         num_commands = len(profile['Commands'])
-        for x in range(0,num_commands):
-            B_P = tk.Button(frame_labels, text=">>")
-            play_but_list.append(B_P)
-            label_CN_list.append(B_P)
-            label_byte_list.append(B_P)
+        print("update_command_list " + str(num_commands))
+        print("update_command_list label_CN_List " + str(len(label_CN_list)))
+        # for x in range(0,num_commands):
+        #     B_P = tk.Button(frame_labels, text=">>")
+        #     play_but_list.append(B_P)
+        #     label_CN_list.append(B_P)
+        #     label_byte_list.append(B_P)
+
         for x in range(0,num_commands):
             B_P = tk.Button(frame_labels, text=">>")
             B_P.grid(column=1, row=x+3, sticky='WNES')
-            play_but_list[x] = B_P
+            play_but_list.append(B_P)
             CN = tk.Label(frame_labels, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white")
+            print("command name " + str(profile['Commands'][x]['name']))
             CN.grid(column=2, row=x+3, sticky='WNES')
-            label_CN_list[x] = CN
+            label_CN_list.append(CN)
         bytes_s=""
         for y in range(0,num_commands):
             bytes_s = profile['Commands'][y]['bytes']
+            print("byte string" + bytes_s)
             CB = tk.Label(frame_labels, text=bytes_s,borderwidth=1, relief="solid",bg="white")
             CB.grid(column=3, row=y+3, sticky='WNES')
-            label_byte_list[x] = CB
+            label_byte_list.append(CB)
             bytes_s=""
 
-    def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels):
+        frame_labels.update_idletasks()
+
+        columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
+        if(num_commands <= 15):
+            rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
+        else:
+            rows_height = label_byte_list[0].winfo_height() * 16
+        window_height = remove_but_list[0].winfo_height() * (num_commands)
+        print("update_command_list columns_width" + str(columns_width))
+        print("update_command_list rows_height" + str(rows_height))
+        main_frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
+        main_canvas.config(scrollregion=main_canvas.bbox("all"))
+
+    def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -203,7 +221,7 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame,main_frame_canvas,main_canvas,frame_labels) ).grid(column=1, row=1, sticky='WNS')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame,main_frame_canvas,main_canvas,frame_labels,main_vsb) ).grid(column=1, row=1, sticky='WNS')
 
         frame_canvas = tk.Frame(popup)
         frame_canvas.grid(row=2, column=1, pady=(5, 0), sticky='nw')
@@ -400,7 +418,7 @@ class Commandframe(tk.Frame):
 
 
 
-    def store_entries(self,frame,main_frame_canvas,main_canvas,frame_labels):
+    def store_entries(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
             global entry_CN_list
             global entry_byte_list
             global remove_but_list
@@ -426,7 +444,7 @@ class Commandframe(tk.Frame):
             play_but_list*= 0
             label_CN_list*= 0
             label_byte_list*= 0
-            self.update_command_list(frame,unsaved_profile,main_frame_canvas,main_canvas,frame_labels)
+            self.update_command_list(frame,unsaved_profile,main_frame_canvas,main_canvas,frame_labels,main_vsb)
             #print(unsaved_profile)
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
