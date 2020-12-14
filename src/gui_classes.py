@@ -120,13 +120,23 @@ class Commandframe(tk.Frame):
                     B_P = tk.Button(frame_labels, text=">>")
                     B_P.grid(column=1, row=x+3, sticky='WNES')
                     play_but_list.append(B_P)
-                    CN = tk.Label(frame_labels, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white")
+                    name_lenght = len(profile['Commands'][x]['name'])
+                    if name_lenght > 30:
+                        final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+                    else:
+                        final_name_string = profile['Commands'][x]['name']
+                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
                 bytes_s=""
                 for y in range(0,num_commands):
                     bytes_s = profile['Commands'][y]['bytes']
-                    CB = tk.Label(frame_labels, text=bytes_s,borderwidth=1, relief="solid",bg="white")
+                    byte_lenght = len(bytes_s)
+                    if byte_lenght > 30:
+                        final_byte_string = bytes_s[0:29] + " ..."
+                    else:
+                        final_byte_string = bytes_s
+                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white")
                     CB.grid(column=3, row=y+3, sticky='WNES')
                     label_byte_list.append(CB)
                     bytes_s=""
@@ -162,7 +172,12 @@ class Commandframe(tk.Frame):
             B_P = tk.Button(frame_labels, text=">>")
             B_P.grid(column=1, row=x+3, sticky='WNES')
             play_but_list.append(B_P)
-            CN = tk.Label(frame_labels, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white")
+            name_lenght = len(profile['Commands'][x]['name'])
+            if name_lenght > 30:
+                final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+            else:
+                final_name_string = profile['Commands'][x]['name']
+            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white")
             print("command name " + str(profile['Commands'][x]['name']))
             CN.grid(column=2, row=x+3, sticky='WNES')
             label_CN_list.append(CN)
@@ -170,7 +185,12 @@ class Commandframe(tk.Frame):
         for y in range(0,num_commands):
             bytes_s = profile['Commands'][y]['bytes']
             print("byte string" + bytes_s)
-            CB = tk.Label(frame_labels, text=bytes_s,borderwidth=1, relief="solid",bg="white")
+            byte_lenght = len(bytes_s)
+            if byte_lenght > 30:
+                final_byte_string = bytes_s[0:29] + " ..."
+            else:
+                final_byte_string = bytes_s
+            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white")
             CB.grid(column=3, row=y+3, sticky='WNES')
             label_byte_list.append(CB)
             bytes_s=""
