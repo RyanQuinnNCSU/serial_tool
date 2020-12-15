@@ -125,7 +125,7 @@ class Commandframe(tk.Frame):
                         final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
                     else:
                         final_name_string = profile['Commands'][x]['name']
-                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white")
+                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
                 bytes_s=""
@@ -136,7 +136,7 @@ class Commandframe(tk.Frame):
                         final_byte_string = bytes_s[0:29] + " ..."
                     else:
                         final_byte_string = bytes_s
-                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white")
+                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
                     CB.grid(column=3, row=y+3, sticky='WNES')
                     label_byte_list.append(CB)
                     bytes_s=""
@@ -177,7 +177,7 @@ class Commandframe(tk.Frame):
                 final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
             else:
                 final_name_string = profile['Commands'][x]['name']
-            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white")
+            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
             print("command name " + str(profile['Commands'][x]['name']))
             CN.grid(column=2, row=x+3, sticky='WNES')
             label_CN_list.append(CN)
@@ -190,7 +190,7 @@ class Commandframe(tk.Frame):
                 final_byte_string = bytes_s[0:29] + " ..."
             else:
                 final_byte_string = bytes_s
-            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white")
+            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
             CB.grid(column=3, row=y+3, sticky='WNES')
             label_byte_list.append(CB)
             bytes_s=""
