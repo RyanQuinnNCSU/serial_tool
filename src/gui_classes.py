@@ -91,6 +91,7 @@ class Commandframe(tk.Frame):
             global label_CN_list
             global label_byte_list
             global play_but_list
+            global unsaved_profile
             #load config data
             config = {}
             with open("../json/config.json", "r") as read_file:
@@ -109,6 +110,7 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
+                unsaved_profile = profile
                 num_commands = len(profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
 
@@ -505,12 +507,47 @@ class Optionsframe(tk.Frame):
         COM_v = tk.StringVar(self)
         COM_v.set("COM Port")
         #Setup Com Port Drop Down Menu.
+        com_label = tk.Label(self, text="Serial Device: ")
+        com_label.grid(column=1, row=1, sticky='EW')
         COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
         COM_drop.config(width=90, font=('Helvetica', 12))
-        COM_drop.grid(column=1, row=1, sticky='W')
+        COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
         refresh = tk.Button(self, text="Refesh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
-        refresh.grid(column=2, row=1, sticky='E')
+        refresh.grid(column=3, row=1, sticky='E')
+
+        space = tk.Label(self)
+        space.grid(column=1, row=2,sticky='WENS')
+
+        baud_label = tk.Label(self, text="Baud Rate: ")
+        baud_label.grid(column=1, row=3, sticky='EW')
+        baudrate = unsaved_profile["Baudrate"]
+        baudrate_entry = ttk.Entry(self)
+        baudrate_entry.insert(0, baudrate)
+        baudrate_entry.grid(column=2, row=3, sticky='WE')
+
+        space2 = tk.Label(self)
+        space2.grid(column=1, row=4,sticky='WENS')
+
+        ascii_v = tk.StringVar(self)
+        ascii_v.set("Select Byte Format")
+
+        ascii_array = ["HEX","ASCII"]
+        ascii_label = tk.Label(self, text="Byte Format: ")
+        ascii_label.grid(column=1, row=5, sticky='EW')
+        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array)
+        ascii_drop.config(width=90, font=('Helvetica', 12))
+        ascii_drop.grid(column=2, row=5, sticky='W')
+
+        space3 = tk.Label(self)
+        space3.grid(column=1, row=6,sticky='WENS')
+
+        Interval_label = tk.Label(self, text="Time Interval: ")
+        Interval_label.grid(column=1, row=7, sticky='EW')
+        Interval = unsaved_profile["Interval"]
+        Interval_entry = ttk.Entry(self)
+        Interval_entry.insert(0, Interval)
+        Interval_entry.grid(column=2, row=7, sticky='WE')
 
     def check_COMs(self,frame,COM_drop,COM_v):
         global unsaved_config
@@ -521,7 +558,7 @@ class Optionsframe(tk.Frame):
         COM_drop.grid_forget()
         COM_drop = tk.OptionMenu(frame, COM_v, *unsaved_config['COM List'])
         COM_drop.config(width=90, font=('Helvetica', 12))
-        COM_drop.grid(column=1, row=1, sticky='W')
+        COM_drop.grid(column=2, row=1, sticky='W')
 
 class Topframe(tk.Frame):
     def __init__(self, master):
