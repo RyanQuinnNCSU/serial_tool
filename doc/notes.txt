@@ -11,6 +11,9 @@ https://pyserial.readthedocs.io/en/latest/tools.html
 Code example of a ribbon:
 https://github.com/israel-dryer/Notepad-Tk
 
+#using scrollbar
+https://stackoverflow.com/questions/43731784/tkinter-canvas-scrollbar-with-grid
+
 Notes:
 *widgets can be relocated by just changing grid location.
 No need to delete old widget.

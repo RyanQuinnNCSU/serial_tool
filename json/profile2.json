@@ -1,0 +1,81 @@
+{
+    "Pofile_name": "Profile 2",
+    "Com Port": "COM 11",
+      "Baudrate": 115200,
+      "Interval": 1.00,
+    "Num_Commands": 18,
+    "Commands": [
+        {
+            "name": "C1",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C2",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C3",
+            "bytes": "0x00 0x00 0x00 0x00 0x03 "
+        },
+        {
+            "name": "C4",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C5",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C6",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C7",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C8",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C9",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C10",
+            "bytes": "0x00 0x00 0x00 0x00 0x03 "
+        },
+        {
+            "name": "C11",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C12",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C13",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C14",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C15",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C16",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        },
+        {
+            "name": "C17",
+            "bytes": "0x00 0x00 0x00 0x00 0x01 "
+        },
+        {
+            "name": "C18",
+            "bytes": "0x00 0x00 0x00 0x00 0x02 "
+        }
+    ]
+}

@@ -13,6 +13,8 @@ remove_but_list = []
 label_CN_list = []
 label_byte_list = []
 play_but_list = []
+canvas_list = []
+canvas_command_list = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -53,10 +55,25 @@ class Commandframe(tk.Frame):
         tk.Frame.__init__(self, master)
         self.grid(column=0, row=1, sticky=('WN'))
         #ttk.Separator(self,orient="vertical").grid(column=3, rowspan=3,ipady=300)
-        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg(self)).grid(column=2, row=1, sticky='WN')
-        tk.Label(self, text="Command Names").grid(column=2, row=2, sticky='WN')
-        tk.Label(self, text="Byte String").grid(column=3, row=2, sticky='WNN')
-        self.list_commands(self)
+
+        frame_canvas = tk.Frame(self)
+        frame_canvas.grid(row=3, column=0, pady=(5, 0), sticky='nsew')
+        frame_canvas.grid_rowconfigure(0, weight=1)
+        frame_canvas.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas.grid(row=0, column=0, sticky="news")
+        canvas_command_list.append(canvas)
+        # Create a frame to contain the buttons
+        frame_labels = tk.Frame(canvas)
+        id= canvas.create_window((0, 0), window=frame_labels, anchor='nw')
+        canvas_command_list.append(id)
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        tk.Button(self, text="Edit Command List",command=lambda : self.popupmsg(self,frame_canvas,canvas,frame_labels,vsb)).grid(column=0, row=1, sticky='WN')
+        self.list_commands(self,frame_canvas,canvas,frame_labels,vsb)
     # def popupmsg(self):
     #         popup = tk.Tk()
     #         popup.wm_title("!")
@@ -67,19 +84,25 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
-    def list_commands(self,frame):
+    def send_serial_command(self,index):
+        print("Command Number" + str(index))
+
+    def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
             global remove_but_list
             global label_CN_list
             global label_byte_list
             global play_but_list
+            global unsaved_profile
             #load config data
             config = {}
             with open("../json/config.json", "r") as read_file:
                 config = json.loads(read_file.read())
                 read_file.close()
             #print command table
+            tk.Label(frame_labels, text="Command Names").grid(column=2, row=2, sticky='WN')
+            tk.Label(frame_labels, text="Byte String").grid(column=3, row=2, sticky='WN')
             if config['Profile'] == "../json/default.json":
                 #make empty Table
                 for x in range(0, 8):
@@ -90,23 +113,51 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
+                unsaved_profile = profile
                 num_commands = len(profile['Commands'])
+                print("Number of Commands " + str(num_commands) )
+
+                vsb.grid(row=0, column=1, sticky='ns')
+                #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+                #vsb2.grid(row=num_commands, column=0, sticky='ew')
+                canvas.configure(yscrollcommand=vsb.set)
                 for x in range(0,num_commands):
-                    B_P = tk.Button(frame, text=">>")
+                    B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
                     B_P.grid(column=1, row=x+3, sticky='WNES')
                     play_but_list.append(B_P)
-                    CN = tk.Label(frame, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white")
+                    name_lenght = len(profile['Commands'][x]['name'])
+                    if name_lenght > 30:
+                        final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+                    else:
+                        final_name_string = profile['Commands'][x]['name']
+                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
                 bytes_s=""
                 for y in range(0,num_commands):
                     bytes_s = profile['Commands'][y]['bytes']
-                    CB = tk.Label(frame, text=bytes_s,borderwidth=1, relief="solid",bg="white")
+                    byte_lenght = len(bytes_s)
+                    if byte_lenght > 30:
+                        final_byte_string = bytes_s[0:29] + " ..."
+                    else:
+                        final_byte_string = bytes_s
+                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
                     CB.grid(column=3, row=y+3, sticky='WNES')
                     label_byte_list.append(CB)
                     bytes_s=""
+                frame_labels.update_idletasks()
 
-    def update_command_list(self,frame,profile):
+                columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
+                if(num_commands <= 15):
+                    rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
+                else:
+                    rows_height = label_byte_list[0].winfo_height() * 16
+                print("list_commands columns_width" + str(columns_width))
+                print("list_commands rows_height " + str(rows_height))
+                frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+                canvas.config(scrollregion=canvas.bbox("all"))
+
+    def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -114,22 +165,56 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         num_commands = len(profile['Commands'])
+        print("update_command_list " + str(num_commands))
+        print("update_command_list label_CN_List " + str(len(label_CN_list)))
+        # for x in range(0,num_commands):
+        #     B_P = tk.Button(frame_labels, text=">>")
+        #     play_but_list.append(B_P)
+        #     label_CN_list.append(B_P)
+        #     label_byte_list.append(B_P)
+
         for x in range(0,num_commands):
-            B_P = tk.Button(frame, text=">>")
+            B_P = tk.Button(frame_labels, text=">>", command=lambda x=x: self.send_serial_command(x))
             B_P.grid(column=1, row=x+3, sticky='WNES')
             play_but_list.append(B_P)
-            CN = tk.Label(frame, text=profile['Commands'][x]['name'],borderwidth=1, relief="solid", bg="white")
+            name_lenght = len(profile['Commands'][x]['name'])
+            if name_lenght > 30:
+                final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+            else:
+                final_name_string = profile['Commands'][x]['name']
+            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
+            print("command name " + str(profile['Commands'][x]['name']))
             CN.grid(column=2, row=x+3, sticky='WNES')
             label_CN_list.append(CN)
         bytes_s=""
         for y in range(0,num_commands):
             bytes_s = profile['Commands'][y]['bytes']
-            CB = tk.Label(frame, text=bytes_s,borderwidth=1, relief="solid",bg="white")
+            print("byte string" + bytes_s)
+            byte_lenght = len(bytes_s)
+            if byte_lenght > 30:
+                final_byte_string = bytes_s[0:29] + " ..."
+            else:
+                final_byte_string = bytes_s
+            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
             CB.grid(column=3, row=y+3, sticky='WNES')
             label_byte_list.append(CB)
             bytes_s=""
 
-    def popupmsg(self,frame):
+        frame_labels.update_idletasks()
+
+        columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
+        if(num_commands <= 15):
+            rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
+        else:
+            rows_height = label_byte_list[0].winfo_height() * 16
+        window_height = remove_but_list[0].winfo_height() * (num_commands)
+        print("update_command_list columns_width" + str(columns_width))
+        print("update_command_list rows_height" + str(rows_height))
+        main_frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
+        main_canvas.config(scrollregion=main_canvas.bbox("all"))
+
+    def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -137,11 +222,18 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         global unsaved_profile
+        #clear data from previous iterations
+
+        remove_but_list*= 0
+        entry_CN_list*= 0
+        entry_byte_list*= 0
+
+
         popup = tk.Tk()
         popup.title("!")
         profile = {}
         num_commands=0
-        w = 500
+        w = 800
         h = 500
         ws = popup.winfo_screenwidth() # width of the screen
         hs = popup.winfo_screenheight() # height of the screen
@@ -154,7 +246,23 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame) ).grid(column=2, row=1, sticky='WNES')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame,main_frame_canvas,main_canvas,frame_labels,main_vsb) ).grid(column=1, row=1, sticky='WNS')
+
+        frame_canvas = tk.Frame(popup)
+        frame_canvas.grid(row=2, column=1, pady=(5, 0), sticky='nw')
+        frame_canvas.grid_rowconfigure(0, weight=1)
+        frame_canvas.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas.grid(row=0, column=0, sticky="news")
+        canvas_list.append(canvas)
+        # Create a frame to contain the buttons
+        frame_entries = tk.Frame(canvas)
+        id = canvas.create_window((0, 0), window=frame_entries, anchor='nw')
+        canvas_list.append(id)
 
         config_p = {}
         with open("../json/config.json", "r") as read_file:
@@ -166,59 +274,98 @@ class Commandframe(tk.Frame):
             for x in range(0, 8):
                 print(PH)
         else:
-            with open(config_p['Profile'], "r") as read_file:
-                profile = json.loads(read_file.read())
-                unsaved_profile=profile.copy()
-                #print("num commands = %d",unsaved_profile['Num_Commands'])
-                read_file.close()
-            num_commands = len(profile['Commands'])
-            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
-            add_button.grid(column=2, row=num_commands+2, sticky='WNES')
+            if not bool(unsaved_profile):
+                with open(config_p['Profile'], "r") as read_file:
+                    profile = json.loads(read_file.read())
+                    unsaved_profile=profile.copy()
+                    #print("num commands = %d",unsaved_profile['Num_Commands'])
+                    read_file.close()
+                num_commands = len(profile['Commands'])
+            else:
+                num_commands = len(unsaved_profile['Commands'])
+
+            # Link a scrollbar to the canvas
+            vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+            vsb.grid(row=0, column=1, sticky='ns')
+            #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+            #vsb2.grid(row=num_commands, column=0, sticky='ew')
+            canvas.configure(yscrollcommand=vsb.set)
+            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
+            add_button.grid(column=1, row=3, sticky='WNES')
+            for w in range (0,num_commands):
+                remove_button_ph = ttk.Button(frame_entries)
+                remove_but_list.append(remove_button_ph)
+                Ex_ph = ttk.Entry(frame_entries,width=30)
+                entry_CN_list.append(Ex_ph)
+                Ey_ph = ttk.Entry(frame_entries,width=80)
+                entry_byte_list.append(Ey_ph)
             for x in range(0,num_commands):
                 index = x
-                remove_button = ttk.Button(popup, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
-                remove_button.grid(column=1, row=x+2, sticky='WNES')
-                remove_but_list.append(remove_button)
-                Ex = ttk.Entry(popup,width=30)
-                Ex.insert(0, profile['Commands'][x]['name'])
-                Ex.grid(column=2, row=x+2, sticky='WNES')
-                entry_CN_list.append(Ex)
-                bytes_s = profile['Commands'][x]['bytes']
-                Ey = ttk.Entry(popup,width=30)
+                remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
+                remove_button.grid(column=1, row=x, sticky='WNES')
+                remove_but_list[x] = remove_button
+                Ex = ttk.Entry(frame_entries,width=30)
+                Ex.insert(0, unsaved_profile['Commands'][x]['name'])
+                Ex.grid(column=2, row=x, sticky='WNES')
+                entry_CN_list[x] = Ex
+                bytes_s = unsaved_profile['Commands'][x]['bytes']
+                Ey = ttk.Entry(frame_entries,width=80)
                 Ey.insert(0, bytes_s)
-                Ey.grid(column=3, row=x+2, sticky='WNES')
-                entry_byte_list.append(Ey)
+                Ey.grid(column=3, row=x, sticky='WNES')
+                entry_byte_list[x] = Ey
+        frame_entries.update_idletasks()
+
+        columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
+        if(num_commands <= 15):
+            rows_height = remove_but_list[0].winfo_height() * (num_commands)
+        else:
+            rows_height = remove_but_list[0].winfo_height() * 16
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        # Set the canvas scrolling region
+
+
+
+        canvas.config(scrollregion=canvas.bbox("all"))
 
 
         popup.mainloop()
 
-    def update_command_entries(self,popup,profile):
+    def update_command_entries(self,popup,frame_entries,frame_canvas,vsb,profile):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
         global label_CN_list
         global label_byte_list
         global play_but_list
+        print("update_command_entries "+str(len(remove_but_list)) )
         num_commands = len(profile['Commands'])
-        add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup, add_button))
-        add_button.grid(column=2, row=num_commands+2, sticky='WNES')
         for x in range(0,num_commands):
             index = x
-            remove_button = ttk.Button(popup, text="-", command =lambda index=index:  self.remove_command(popup,index,add_button) )
-            remove_button.grid(column=1, row=x+2, sticky='WNES')
-            remove_but_list.append(remove_button)
-            Ex = ttk.Entry(popup,width=30)
+            remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
+            remove_button.grid(column=1, row=x, sticky='WNES')
+            remove_but_list[x] = remove_button
+            Ex = ttk.Entry(frame_entries,width=30)
             Ex.insert(0, profile['Commands'][x]['name'])
-            Ex.grid(column=2, row=x+2, sticky='WNES')
-            entry_CN_list.append(Ex)
+            Ex.grid(column=2, row=x, sticky='WNES')
+            entry_CN_list[x] = Ex
             bytes_s = profile['Commands'][x]['bytes']
-            Ey = ttk.Entry(popup,width=30)
+            Ey = ttk.Entry(frame_entries,width=80)
             Ey.insert(0, bytes_s)
-            Ey.grid(column=3, row=x+2, sticky='WNES')
-            entry_byte_list.append(Ey)
+            Ey.grid(column=3, row=x, sticky='WNES')
+            entry_byte_list[x] = Ey
+        frame_entries.update_idletasks()
 
+        columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
+        if(num_commands <= 15):
+            rows_height = remove_but_list[0].winfo_height() * (num_commands)
+        else:
+            rows_height = remove_but_list[0].winfo_height() * 16
+        window_height = remove_but_list[0].winfo_height() * (num_commands)
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        canvas_list[0].itemconfig(canvas_list[1],height=window_height)
+        canvas_list[0].configure(scrollregion=canvas_list[0].bbox("all"))
 
-    def remove_command(self,popup,index,add_button):
+    def remove_command(self,popup,frame_entries,frame_canvas,index,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -226,38 +373,44 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         #See if command being deleted is in the current profile.
-        with open("../json/config.json", "r") as read_file:
-            config_p = json.loads(read_file.read())
-            read_file.close()
-        if config_p['Profile'] != "../json/default.json":
-            with open(config_p['Profile'], "r") as read_file:
-                profile = json.loads(read_file.read())
-                read_file.close()
-            num_commands = len(profile['Commands'])
-            if(index < num_commands): #command is in current profile
-                profile['Commands'].pop(index)
-                profile['Num_Commands'] = num_commands-1
+        # with open("../json/config.json", "r") as read_file:
+        #     config_p = json.loads(read_file.read())
+        #     read_file.close()
+        # if config_p['Profile'] != "../json/default.json":
+        #     with open(config_p['Profile'], "r") as read_file:
+        #         profile = json.loads(read_file.read())
+        #         read_file.close()
+        #     num_commands = len(profile['Commands'])
+        #     if(index < num_commands): #command is in current profile
+        #         profile['Commands'].pop(index)
+        #         profile['Num_Commands'] = num_commands-1
+
+
         #print(profile['Commands'])
         #See if command is being deleted is in the unsaved profile
         num_commands = len(unsaved_profile['Commands'])
-        if(index < num_commands): #command is in current profile
-            unsaved_profile['Commands'].pop(index)
-            unsaved_profile['Num_Commands'] = num_commands-1
+        #if(index < num_commands): #command is in current profile
+        print("remove_command" + str(index))
+        unsaved_profile['Commands'].pop(index)
+        unsaved_profile['Num_Commands'] = num_commands-1
+
             #print(unsaved_profile['Commands'])
         #remove command widgets
         for x in range(0,len(remove_but_list)):
             remove_but_list[x].grid_forget()
             entry_CN_list[x].grid_forget()
             entry_byte_list[x].grid_forget()
-        add_button.grid_forget()
-        #clear widget list
-        remove_but_list *= 0
-        entry_CN_list*= 0
-        entry_byte_list*= 0
+        ##clear widget list
+        #remove_but_list *= 0
+        #entry_CN_list*= 0
+        #entry_byte_list*= 0
+        remove_but_list.pop(index)
+        entry_CN_list.pop(index)
+        entry_byte_list.pop(index)
         #reset command widgets
-        self.update_command_entries(popup,unsaved_profile)
+        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
 
-    def add_command(self, popup, add_button):
+    def add_command(self, popup,frame_entries,frame_canvas,vsb):
         global entry_CN_list
         global entry_byte_list
         global remove_but_list
@@ -266,22 +419,31 @@ class Commandframe(tk.Frame):
         global play_but_list
         global unsaved_profile
         unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
-        num_commands = unsaved_profile['Num_Commands']
-        remove_button = ttk.Button(popup, text="-", command =lambda :  self.remove_command(popup,num_commands+1) )
-        remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
-        remove_but_list.append(remove_button)
-        Ex = ttk.Entry(popup)
-        Ex.grid(column=2, row=num_commands+1, sticky='WNES')
-        entry_CN_list.append(Ex)
-        Ey = ttk.Entry(popup)
-        Ey.grid(column=3, row=num_commands+1, sticky='WNES')
-        add_button.grid(column=1, row=num_commands+2, sticky='WNES')
-        entry_byte_list.append(Ey)
+        # num_commands = unsaved_profile['Num_Commands']
+        # remove_button = ttk.Button(frame_entries, text="-", command =lambda :  self.remove_command(popup,num_commands+1,add_button) )
+        # remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
+        # remove_but_list.append(remove_button)
+        # Ex = ttk.Entry(frame_entries)
+        # Ex.grid(column=2, row=num_commands, sticky='WNES')
+        # entry_CN_list.append(Ex)
+        # Ey = ttk.Entry(frame_entries)
+        # Ey.grid(column=3, row=num_commands, sticky='WNES')
+        # add_button.grid(column=1, row=num_commands+2, sticky='WNES')
+        # entry_byte_list.append(Ey)
+        #append to global button and entry list_ports
+        remove_button_ph = ttk.Button(frame_entries)
+        remove_but_list.append(remove_button_ph)
+        Ex_ph = ttk.Entry(frame_entries,width=30)
+        entry_CN_list.append(Ex_ph)
+        Ey_ph = ttk.Entry(frame_entries,width=30)
+        entry_byte_list.append(Ey_ph)
         empty_command = { "name":"", "bytes": ""}
         unsaved_profile['Commands'].append(empty_command)
+        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
 
 
-    def store_entries(self,frame):
+
+    def store_entries(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
             global entry_CN_list
             global entry_byte_list
             global remove_but_list
@@ -289,7 +451,8 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
-            print("Store Entries")
+            #print("Store Entries")
+            print("store_entries " + str(unsaved_profile['Num_Commands']) )
             x=0
             for entry in entry_CN_list:
                 unsaved_profile['Commands'][x]['name'] = entry.get()
@@ -306,7 +469,7 @@ class Commandframe(tk.Frame):
             play_but_list*= 0
             label_CN_list*= 0
             label_byte_list*= 0
-            self.update_command_list(frame,unsaved_profile)
+            self.update_command_list(frame,unsaved_profile,main_frame_canvas,main_canvas,frame_labels,main_vsb)
             #print(unsaved_profile)
     # def table(total_rows, total_columns,self,master,profile):
     #     with open(profile, "r") as profile_file:
@@ -347,12 +510,47 @@ class Optionsframe(tk.Frame):
         COM_v = tk.StringVar(self)
         COM_v.set("COM Port")
         #Setup Com Port Drop Down Menu.
+        com_label = tk.Label(self, text="Serial Device: ")
+        com_label.grid(column=1, row=1, sticky='EW')
         COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
-        COM_drop.config(width=90, font=('Helvetica', 12))
-        COM_drop.grid(column=1, row=1, sticky='W')
+        COM_drop.config(width=40, font=('Helvetica', 12))
+        COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
         refresh = tk.Button(self, text="Refesh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
-        refresh.grid(column=2, row=1, sticky='E')
+        refresh.grid(column=3, row=1, sticky='E')
+
+        space = tk.Label(self)
+        space.grid(column=1, row=2,sticky='WENS')
+
+        baud_label = tk.Label(self, text="Baud Rate: ")
+        baud_label.grid(column=1, row=3, sticky='EW')
+        baudrate = unsaved_profile["Baudrate"]
+        baudrate_entry = ttk.Entry(self)
+        baudrate_entry.insert(0, baudrate)
+        baudrate_entry.grid(column=2, row=3, sticky='WE')
+
+        space2 = tk.Label(self)
+        space2.grid(column=1, row=4,sticky='WENS')
+
+        ascii_v = tk.StringVar(self)
+        ascii_v.set("Select Byte Format")
+
+        ascii_array = ["HEX","ASCII"]
+        ascii_label = tk.Label(self, text="Byte Format: ")
+        ascii_label.grid(column=1, row=5, sticky='EW')
+        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array)
+        ascii_drop.config(width=40, font=('Helvetica', 12))
+        ascii_drop.grid(column=2, row=5, sticky='W')
+
+        space3 = tk.Label(self)
+        space3.grid(column=1, row=6,sticky='WENS')
+
+        Interval_label = tk.Label(self, text="Time Interval: ")
+        Interval_label.grid(column=1, row=7, sticky='EW')
+        Interval = unsaved_profile["Interval"]
+        Interval_entry = ttk.Entry(self)
+        Interval_entry.insert(0, Interval)
+        Interval_entry.grid(column=2, row=7, sticky='WE')
 
     def check_COMs(self,frame,COM_drop,COM_v):
         global unsaved_config
@@ -363,7 +561,7 @@ class Optionsframe(tk.Frame):
         COM_drop.grid_forget()
         COM_drop = tk.OptionMenu(frame, COM_v, *unsaved_config['COM List'])
         COM_drop.config(width=90, font=('Helvetica', 12))
-        COM_drop.grid(column=1, row=1, sticky='W')
+        COM_drop.grid(column=2, row=1, sticky='W')
 
 class Topframe(tk.Frame):
     def __init__(self, master):
