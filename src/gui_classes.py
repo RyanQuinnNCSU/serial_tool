@@ -85,7 +85,11 @@ class Commandframe(tk.Frame):
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
     def send_serial_command(self,index):
-        print("Command Number" + str(index))
+        print("Command Number " + str(index))
+        bytes = unsaved_profile['Commands'][index]['bytes']
+        com_port = unsaved_profile['Com Port']
+        baudrate = unsaved_profile['Baudrate']
+        SF.send_serial(bytes,com_port,baudrate)
 
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list

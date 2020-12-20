@@ -45,5 +45,11 @@ def list_ports():
         print(e)
         sys.exit(1)
 
+
+def send_serial(bytes,com_port,baudrate):
+    print("Bytes to send: " + bytes)
+    print("Com Port: " + com_port)
+    print("Baudrate: " + str(baudrate))
+
 if __name__ == "__main__":
     list_ports()
