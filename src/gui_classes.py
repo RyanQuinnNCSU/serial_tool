@@ -84,6 +84,9 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
+    def send_serial_command(self,index):
+        print("Command Number" + str(index))
+
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
@@ -119,7 +122,7 @@ class Commandframe(tk.Frame):
                 #vsb2.grid(row=num_commands, column=0, sticky='ew')
                 canvas.configure(yscrollcommand=vsb.set)
                 for x in range(0,num_commands):
-                    B_P = tk.Button(frame_labels, text=">>")
+                    B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
                     B_P.grid(column=1, row=x+3, sticky='WNES')
                     play_but_list.append(B_P)
                     name_lenght = len(profile['Commands'][x]['name'])
@@ -171,7 +174,7 @@ class Commandframe(tk.Frame):
         #     label_byte_list.append(B_P)
 
         for x in range(0,num_commands):
-            B_P = tk.Button(frame_labels, text=">>")
+            B_P = tk.Button(frame_labels, text=">>", command=lambda x=x: self.send_serial_command(x))
             B_P.grid(column=1, row=x+3, sticky='WNES')
             play_but_list.append(B_P)
             name_lenght = len(profile['Commands'][x]['name'])
@@ -510,7 +513,7 @@ class Optionsframe(tk.Frame):
         com_label = tk.Label(self, text="Serial Device: ")
         com_label.grid(column=1, row=1, sticky='EW')
         COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
-        COM_drop.config(width=90, font=('Helvetica', 12))
+        COM_drop.config(width=40, font=('Helvetica', 12))
         COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
         refresh = tk.Button(self, text="Refesh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
@@ -536,7 +539,7 @@ class Optionsframe(tk.Frame):
         ascii_label = tk.Label(self, text="Byte Format: ")
         ascii_label.grid(column=1, row=5, sticky='EW')
         ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array)
-        ascii_drop.config(width=90, font=('Helvetica', 12))
+        ascii_drop.config(width=40, font=('Helvetica', 12))
         ascii_drop.grid(column=2, row=5, sticky='W')
 
         space3 = tk.Label(self)
