@@ -85,7 +85,7 @@ class Commandframe(tk.Frame):
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
     def send_serial_command(self,index):
-        print("Command Number " + str(index))
+
         bytes = unsaved_profile['Commands'][index]['bytes']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']

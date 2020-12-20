@@ -47,9 +47,24 @@ def list_ports():
 
 
 def send_serial(bytes,com_port,baudrate):
-    print("Bytes to send: " + bytes)
+    #remove '0x' from bytes
+    byte_s1 = bytes.replace("0x", "")
+    #remove ' ' from bytes
+    byte_s2 = byte_s1.replace("0x", "")
+    byte_2_send =  bytearray.fromhex(byte_s2)
+    print("Bytes to send: " + str(byte_2_send))
     print("Com Port: " + com_port)
     print("Baudrate: " + str(baudrate))
+
+    ser = serial.Serial(com_port, baudrate, timeout=5)
+    print("Serial Open")
+    print("Transmitted gecko_cmd_system_get_bt_address")
+    ser.write(byte_2_send)
+    response = ser.read(500)
+    # response_decode = response.decode("hex")
+    ser.close()
+    print("Serial Closed")
+    print("Serial Response = " + str(response))
 
 if __name__ == "__main__":
     list_ports()
