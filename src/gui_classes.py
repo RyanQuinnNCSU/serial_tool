@@ -15,6 +15,7 @@ label_byte_list = []
 play_but_list = []
 canvas_list = []
 canvas_command_list = []
+transaction_window = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -490,14 +491,53 @@ class Commandframe(tk.Frame):
 class Transactionframe(tk.Frame):
 
     def __init__(self, master):
-
+        global transaction_window
         tk.Frame.__init__(self, master)
         self.grid(column=1, row=1, sticky=('NSEW'))
-        tk.Label(self, text="Serial Transaction Log").grid(column=1, row=2, sticky='W')
-        text_w = tk.Text(self)
-        text_w.grid(column=1, row=2, sticky='NSEW')
+
+        #transaction_window: 0-canvas, 1-canvas, id 2-text widget
+
+        tk.Label(self, text="Serial Transaction Log").grid(column=1, row=1, sticky='W')
+
+
+        frame_canvas = tk.Frame(self)
+        frame_canvas.grid(row=2, column=1, sticky='nsew')
+        frame_canvas.grid_rowconfigure(0, weight=1)
+        frame_canvas.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas.grid(row=0, column=0, sticky="news")
+        transaction_window.append(canvas)
+        # Create a frame to contain the buttons
+        frame_text = tk.Frame(canvas)
+        id= canvas.create_window((0, 0), window=frame_text, anchor='nw')
+        transaction_window.append(id)
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+
+        vsb.grid(row=0, column=1, sticky='ns')
+        #canvas.configure(yscrollcommand=vsb.set)
+
+        text_w = tk.Text(frame_text)
+        text_w.grid(column=1, row=1, sticky='NSEW')
+        text_w.configure(yscrollcommand=vsb.set)
         text_w.insert(tk.END,"Test")
+        transaction_window.append(text_w)
         #text_w.insert(tk.END,"Test2")
+
+        frame_text.update_idletasks()
+
+        columns_width = text_w.winfo_width()
+
+        rows_height = text_w.winfo_height()
+
+        #window_height = remove_but_list[0].winfo_height() * (num_commands)
+        print("vsb width" + str(vsb.winfo_width()) )
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
+        canvas.config(scrollregion=canvas.bbox("all"))
 
 class Optionsframe(tk.Frame):
 
