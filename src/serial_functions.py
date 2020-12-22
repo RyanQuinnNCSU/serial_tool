@@ -1,6 +1,8 @@
 import sys
 import serial
+import tkinter as tk
 from serial.tools import list_ports
+import gui_classes
 import json
 
 config = {}
@@ -46,7 +48,7 @@ def list_ports():
         sys.exit(1)
 
 
-def send_serial(bytes,com_port,baudrate):
+def send_serial(bytes,com_port,baudrate,transaction_window):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")
     #remove ' ' from bytes
@@ -60,11 +62,14 @@ def send_serial(bytes,com_port,baudrate):
     print("Serial Open")
     print("Transmitted gecko_cmd_system_get_bt_address")
     ser.write(byte_2_send)
+    transaction_window.insert(tk.END,"TX: " + str(byte_2_send) + "\r\n")
     response = ser.read(500)
     # response_decode = response.decode("hex")
     ser.close()
     print("Serial Closed")
     print("Serial Response = " + str(response))
+    transaction_window.insert(tk.END,"RX: " + str(response) + "\r\n")
+
 
 if __name__ == "__main__":
     list_ports()

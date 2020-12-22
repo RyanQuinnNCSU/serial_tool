@@ -90,7 +90,7 @@ class Commandframe(tk.Frame):
         bytes = unsaved_profile['Commands'][index]['bytes']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
-        SF.send_serial(bytes,com_port,baudrate)
+        SF.send_serial(bytes,com_port,baudrate,transaction_window[2])
 
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
@@ -523,7 +523,7 @@ class Transactionframe(tk.Frame):
         text_w = tk.Text(frame_text)
         text_w.grid(column=1, row=1, sticky='NSEW')
         text_w.configure(yscrollcommand=vsb.set)
-        text_w.insert(tk.END,"Test")
+        #text_w.insert(tk.END,"Test")
         transaction_window.append(text_w)
         #text_w.insert(tk.END,"Test2")
 
