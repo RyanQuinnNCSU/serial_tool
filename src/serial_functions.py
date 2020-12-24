@@ -57,18 +57,31 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
     print("Bytes to send: " + str(byte_2_send))
     print("Com Port: " + com_port)
     print("Baudrate: " + str(baudrate))
-
+    #transaction_window.insert(tk.END,"TX: " + str(bytes) + "\r\n")
     ser = serial.Serial(com_port, baudrate, timeout=5)
     print("Serial Open")
     print("Transmitted gecko_cmd_system_get_bt_address")
     ser.write(byte_2_send)
-    transaction_window.insert(tk.END,"TX: " + str(byte_2_send) + "\r\n")
     response = ser.read(500)
     # response_decode = response.decode("hex")
     ser.close()
     print("Serial Closed")
     print("Serial Response = " + str(response))
-    transaction_window.insert(tk.END,"RX: " + str(response) + "\r\n")
+    #print("Serial Decoded Response = " + str(response.decode("utf-8")) )
+    response_s = str(response)
+    first_qm = response_s.find('\'')
+    if(first_qm == -1):
+        transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
+
+    else:
+        second_gm = response_s.find('\'',first_qm +1)
+        unquoted_s = response_s[first_qm+1:second_gm]
+        replace_slash_s = unquoted_s.replace('\\','0')
+        add_spaces_s = replace_slash_s.replace('0x',' 0x')
+        final_rsp_string = add_spaces_s[1:]
+        transaction_window.insert(tk.END,"RX: " + str(final_rsp_string) + "\r\n")
+
+
 
 
 if __name__ == "__main__":

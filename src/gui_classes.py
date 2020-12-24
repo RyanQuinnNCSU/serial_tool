@@ -90,6 +90,8 @@ class Commandframe(tk.Frame):
         bytes = unsaved_profile['Commands'][index]['bytes']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
+        transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+        transaction_window[2].update() 
         SF.send_serial(bytes,com_port,baudrate,transaction_window[2])
 
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
