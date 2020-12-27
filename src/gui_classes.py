@@ -86,12 +86,12 @@ class Commandframe(tk.Frame):
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
     def send_serial_command(self,index):
-
+        global unsaved_profile
         bytes = unsaved_profile['Commands'][index]['bytes']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
         transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
-        transaction_window[2].update() 
+        transaction_window[2].update()
         SF.send_serial(bytes,com_port,baudrate,transaction_window[2])
 
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
@@ -545,6 +545,7 @@ class Optionsframe(tk.Frame):
 
     def __init__(self, master):
         global unsaved_config
+        global unsaved_profile
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
         #load config data
@@ -558,7 +559,7 @@ class Optionsframe(tk.Frame):
         #Setup Com Port Drop Down Menu.
         com_label = tk.Label(self, text="Serial Device: ")
         com_label.grid(column=1, row=1, sticky='EW')
-        COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
+        COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'],command=self.get_com)
         COM_drop.config(width=40, font=('Helvetica', 12))
         COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
@@ -598,6 +599,16 @@ class Optionsframe(tk.Frame):
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
 
+    def get_com(self, value):
+        global unsaved_profile
+        print("get com has executed")
+        print("value = "+value)
+        value_index = value.find(":")
+        if(value_index == -1):
+            print('No COM Port Devices found.')
+        else:
+            unsaved_profile['Com Port'] = value[:value_index]
+            print("unsaved_profile com port = " + unsaved_profile['Com Port'])
     def check_COMs(self,frame,COM_drop,COM_v):
         global unsaved_config
         SF.list_ports()

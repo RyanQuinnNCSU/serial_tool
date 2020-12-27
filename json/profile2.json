@@ -1,6 +1,6 @@
 {
     "Pofile_name": "Profile 2",
-    "Com Port": "COM3",
+    "Com Port": "COM5",
       "Baudrate": 115200,
       "Interval": 1.00,
     "Num_Commands": 18,
