@@ -52,7 +52,8 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")
     #remove ' ' from bytes
-    byte_s2 = byte_s1.replace("0x", "")
+    byte_s2 = byte_s1.replace(" ", "")
+    print("Byte check = " + byte_s2)
     byte_2_send =  bytearray.fromhex(byte_s2)
     print("Bytes to send: " + str(byte_2_send))
     print("Com Port: " + com_port)
@@ -69,16 +70,25 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
     print("Serial Response = " + str(response))
     #print("Serial Decoded Response = " + str(response.decode("utf-8")) )
     response_s = str(response)
+    response_redo = response.hex()
+    final_rsp_string = "0x" + response_redo[0:2]
+    redo_len = len(response_redo)//2
+
+    for x in range(1,redo_len):
+        start = x*2
+        end = x*2 + 2
+        final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
+    print("response redo = " + final_rsp_string)
     first_qm = response_s.find('\'')
     if(first_qm == -1):
         transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
 
     else:
-        second_gm = response_s.find('\'',first_qm +1)
-        unquoted_s = response_s[first_qm+1:second_gm]
-        replace_slash_s = unquoted_s.replace('\\','0')
-        add_spaces_s = replace_slash_s.replace('0x',' 0x')
-        final_rsp_string = add_spaces_s[1:]
+        # second_gm = response_s.find('\'',first_qm +1)
+        # unquoted_s = response_s[first_qm+1:second_gm]
+        # replace_slash_s = unquoted_s.replace('\\','0')
+        # add_spaces_s = replace_slash_s.replace('0x',' 0x')
+        # final_rsp_string = add_spaces_s[1:]
         transaction_window.insert(tk.END,"RX: " + str(final_rsp_string) + "\r\n")
 
 
