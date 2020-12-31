@@ -16,6 +16,7 @@ play_but_list = []
 canvas_list = []
 canvas_command_list = []
 transaction_window = []
+interval = []
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -92,7 +93,7 @@ class Commandframe(tk.Frame):
         baudrate = unsaved_profile['Baudrate']
         transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
         transaction_window[2].update()
-        SF.send_serial(bytes,com_port,baudrate,transaction_window[2])
+        SF.send_serial(bytes,com_port,baudrate,transaction_window[2],5)
 
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
@@ -546,6 +547,7 @@ class Optionsframe(tk.Frame):
     def __init__(self, master):
         global unsaved_config
         global unsaved_profile
+        global interval
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
         #load config data
@@ -598,6 +600,7 @@ class Optionsframe(tk.Frame):
         Interval_entry = ttk.Entry(self)
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
+        interval.append(Interval_entry)
 
     def get_com(self, value):
         global unsaved_profile
@@ -632,7 +635,7 @@ class Topframe(tk.Frame):
         tk.Button(self, text="Play Script",
                   command=but.play_button).grid(column=1, row=2, sticky='W')
         tk.Button(self, text="Loop",
-                  command=but.loop_button).grid(column=2, row=2, sticky='W')
+                  command=lambda : self.loop_through_serial_commands()).grid(column=2, row=2, sticky='W')
         tk.Button(self, text="Write 2 file",
                   command=but.write_button).grid(column=3, row=2, sticky='W')
         tk.Button(self, text="Clear Terminal",
@@ -653,6 +656,22 @@ class Topframe(tk.Frame):
             json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
             write_file.close()
 
+    def loop_through_serial_commands(self):
+        global unsaved_profile
+        global interval
+        timeout = float(interval[0].get())
+        unsaved_profile['Interval'] = timeout
+        for command in unsaved_profile['Commands']:
+            bytes = command['bytes']
+            com_port = unsaved_profile['Com Port']
+            baudrate = unsaved_profile['Baudrate']
+            command_n = command['name']
+            transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+            transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
+            transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+            transaction_window[2].update()
+            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout)
+        print("End of commmand loop.")
 
 #****************************** Add Command Window *********************************************
 class NewWindow(tk.Frame):

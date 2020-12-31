@@ -48,7 +48,7 @@ def list_ports():
         sys.exit(1)
 
 
-def send_serial(bytes,com_port,baudrate,transaction_window):
+def send_serial(bytes,com_port,baudrate,transaction_window,timeout):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")
     #remove ' ' from bytes
@@ -59,7 +59,7 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
     print("Com Port: " + com_port)
     print("Baudrate: " + str(baudrate))
     #transaction_window.insert(tk.END,"TX: " + str(bytes) + "\r\n")
-    ser = serial.Serial(com_port, baudrate, timeout=5)
+    ser = serial.Serial(com_port, baudrate, timeout=timeout)
     print("Serial Open")
     print("Transmitted gecko_cmd_system_get_bt_address")
     ser.write(byte_2_send)
@@ -82,7 +82,7 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
     first_qm = response_s.find('\'')
     if(first_qm == -1):
         transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
-
+        transaction_window[2].insert(tk.END,"****" + "\r\n")
     else:
         # second_gm = response_s.find('\'',first_qm +1)
         # unquoted_s = response_s[first_qm+1:second_gm]
@@ -90,7 +90,7 @@ def send_serial(bytes,com_port,baudrate,transaction_window):
         # add_spaces_s = replace_slash_s.replace('0x',' 0x')
         # final_rsp_string = add_spaces_s[1:]
         transaction_window.insert(tk.END,"RX: " + str(final_rsp_string) + "\r\n")
-
+        transaction_window.insert(tk.END,"********************************************" + "\r\n")
 
 
 
