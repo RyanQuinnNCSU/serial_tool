@@ -18,6 +18,13 @@ canvas_command_list = []
 ascii_command_list = []
 transaction_window = []
 interval = []
+#frames:
+top = []
+command = []
+trans = []
+options = []
+tk_tk = []
+
 ascii_flag = 1 #0 = ascii, 1 = hex
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
@@ -26,11 +33,11 @@ class SampleApp(tk.Tk):
         self._frame = None
         self.title("Serial Chatter")
         #self.switch_frame(Main_frame)
-        top = Topframe(self)
-        test = Commandframe(self)
-        trans = Transactionframe(self)
-        options = Optionsframe(self)
-
+        top.append(Topframe(self))
+        command.append(Commandframe(self))
+        trans.append(Transactionframe(self))
+        options.append(Optionsframe(self))
+        tk_tk.append(self)
     def switch_frame(self, frame_class):
         """Destroys current frame and replaces it with a new one."""
         new_frame = frame_class(self)
@@ -38,6 +45,11 @@ class SampleApp(tk.Tk):
             self._frame.destroy()
         self._frame = new_frame
         self._frame.grid()
+
+    def restart_frame(self, frame,tk_tk):
+        frame[0].destroy()
+        frame.pop(0)
+        Commandframe(tk_tk)
 
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
@@ -88,6 +100,7 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
+
     def send_serial_command(self,index):
         global unsaved_profile
         bytes = unsaved_profile['Commands'][index]['bytes']
@@ -96,6 +109,8 @@ class Commandframe(tk.Frame):
         transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
         transaction_window[2].update()
         SF.send_serial(bytes,com_port,baudrate,transaction_window[2],5)
+
+
     def update_ascii_commands(self, profile):
         global ascii_command_list
         ascii_command_list = profile['Commands']
@@ -116,6 +131,7 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
+            global ascii_flag
             #load config data
             config = {}
             with open("../json/config.json", "r") as read_file:
@@ -135,6 +151,7 @@ class Commandframe(tk.Frame):
                     profile = json.loads(read_file.read())
                     read_file.close()
                 unsaved_profile = profile
+                #self.update_ascii_commands(unsaved_profile)
                 num_commands = len(profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
 
@@ -156,7 +173,11 @@ class Commandframe(tk.Frame):
                     label_CN_list.append(CN)
                 bytes_s=""
                 for y in range(0,num_commands):
-                    bytes_s = profile['Commands'][y]['bytes']
+                    print("ascii_flag = ", ascii_flag)
+                    if ascii_flag == 1:
+                        bytes_s = profile['Commands'][y]['bytes']
+                    elif ascii_flag == 0:
+                        bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
                     byte_lenght = len(bytes_s)
                     if byte_lenght > 30:
                         final_byte_string = bytes_s[0:29] + " ..."
@@ -177,7 +198,7 @@ class Commandframe(tk.Frame):
                 print("list_commands rows_height " + str(rows_height))
                 frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
                 canvas.config(scrollregion=canvas.bbox("all"))
-            self.update_ascii_commands(unsaved_profile)
+
     def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels,vsb):
         global entry_CN_list
         global entry_byte_list
@@ -185,6 +206,7 @@ class Commandframe(tk.Frame):
         global label_CN_list
         global label_byte_list
         global play_but_list
+        global ascii_flag
         num_commands = len(profile['Commands'])
         print("update_command_list " + str(num_commands))
         print("update_command_list label_CN_List " + str(len(label_CN_list)))
@@ -209,7 +231,11 @@ class Commandframe(tk.Frame):
             label_CN_list.append(CN)
         bytes_s=""
         for y in range(0,num_commands):
-            bytes_s = profile['Commands'][y]['bytes']
+            print("ascii_flag = ", ascii_flag)
+            if ascii_flag == 1:
+                bytes_s = profile['Commands'][y]['bytes']
+            elif ascii_flag == 0:
+                bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
             print("byte string" + bytes_s)
             byte_lenght = len(bytes_s)
             if byte_lenght > 30:
@@ -234,7 +260,7 @@ class Commandframe(tk.Frame):
         main_frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
         main_canvas.config(scrollregion=main_canvas.bbox("all"))
-        self.update_ascii_commands(profile)
+
 
     def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
         global entry_CN_list
@@ -615,15 +641,34 @@ class Optionsframe(tk.Frame):
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
         interval.append(Interval_entry)
-    def change_ascii(self,byte_type):
 
+    def change_ascii(self,byte_type):
+        global command
+        global tk_tk
+        global label_CN_list
+        global label_byte_list
+        global play_but_list
+        global canvas_list
+        global canvas_command_list
+        global ascii_flag
         if(byte_type == "HEX"):
             ascii_flag=1;
             print("Switching to Hex")
         elif(byte_type == "ASCII"):
             ascii_flag=0;
             print("Switching to Ascii")
+        #clear global list
+        label_CN_list.clear()
+        label_byte_list.clear()
+        play_but_list.clear()
+        canvas_list.clear()
+        canvas_command_list.clear()
+        command[0].destroy()
+        command.pop(0)
+        command.append(Commandframe(tk_tk[0]))
         #print("Test ascii dropdown")
+
+
     def get_com(self, value):
         global unsaved_profile
         print("get com has executed")
