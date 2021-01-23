@@ -48,6 +48,32 @@ def list_ports():
         sys.exit(1)
 
 
+
+
+def hex_2_ascii(command):
+    ascii_string=""
+    if(len(command) >> 0):
+        ph = command.replace("0x", "")
+        clean_hex = ph.replace(" ", "")
+        ascii_string=bytearray.fromhex(clean_hex).decode()
+    else:
+     ascii_string=""
+    return ascii_string
+
+def ascii_2_hex(command):
+    hex_string=""
+    if(len(command) >> 0):
+        for char in command:
+                byte_char = str.encode(char)
+                decoded_value = codecs.encode(byte_char, "hex").decode()
+                hex_string = hex_string + "0x" + decoded_value + " "
+    else:
+     hex_string=""
+    return hex_string
+
+
+
+
 def send_serial(bytes,com_port,baudrate,transaction_window,timeout):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")

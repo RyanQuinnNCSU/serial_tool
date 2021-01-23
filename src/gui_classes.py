@@ -15,8 +15,10 @@ label_byte_list = []
 play_but_list = []
 canvas_list = []
 canvas_command_list = []
+ascii_command_list = []
 transaction_window = []
 interval = []
+ascii_flag = 1 #0 = ascii, 1 = hex
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -94,7 +96,18 @@ class Commandframe(tk.Frame):
         transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
         transaction_window[2].update()
         SF.send_serial(bytes,com_port,baudrate,transaction_window[2],5)
-
+    def update_ascii_commands(self, profile):
+        global ascii_command_list
+        ascii_command_list = profile['Commands']
+        #print(ascii_command_list)
+        name = ""
+        bytes = ""
+        for x in range(0,profile['Num_Commands']):
+            name = ascii_command_list[x]['name']
+            print(name)
+            ascii_command_list[x]['bytes'] = SF.hex_2_ascii(ascii_command_list[x]['bytes'])
+            bytes = ascii_command_list[x]['bytes']
+            print(bytes)
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
@@ -164,7 +177,7 @@ class Commandframe(tk.Frame):
                 print("list_commands rows_height " + str(rows_height))
                 frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
                 canvas.config(scrollregion=canvas.bbox("all"))
-
+            self.update_ascii_commands(unsaved_profile)
     def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels,vsb):
         global entry_CN_list
         global entry_byte_list
@@ -221,6 +234,7 @@ class Commandframe(tk.Frame):
         main_frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
         main_canvas.config(scrollregion=main_canvas.bbox("all"))
+        self.update_ascii_commands(profile)
 
     def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
         global entry_CN_list
@@ -587,7 +601,7 @@ class Optionsframe(tk.Frame):
         ascii_array = ["HEX","ASCII"]
         ascii_label = tk.Label(self, text="Byte Format: ")
         ascii_label.grid(column=1, row=5, sticky='EW')
-        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array)
+        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array,command=self.change_ascii)
         ascii_drop.config(width=40, font=('Helvetica', 12))
         ascii_drop.grid(column=2, row=5, sticky='W')
 
@@ -601,7 +615,15 @@ class Optionsframe(tk.Frame):
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
         interval.append(Interval_entry)
+    def change_ascii(self,byte_type):
 
+        if(byte_type == "HEX"):
+            ascii_flag=1;
+            print("Switching to Hex")
+        elif(byte_type == "ASCII"):
+            ascii_flag=0;
+            print("Switching to Ascii")
+        #print("Test ascii dropdown")
     def get_com(self, value):
         global unsaved_profile
         print("get com has executed")
