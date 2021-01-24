@@ -178,6 +178,8 @@ class Commandframe(tk.Frame):
                         bytes_s = profile['Commands'][y]['bytes']
                     elif ascii_flag == 0:
                         bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
+                    elif ascii_flag == 2:
+                        bytes_s = SF.hex_2_dec(profile['Commands'][y]['bytes'])
                     byte_lenght = len(bytes_s)
                     if byte_lenght > 30:
                         final_byte_string = bytes_s[0:29] + " ..."
@@ -236,6 +238,8 @@ class Commandframe(tk.Frame):
                 bytes_s = profile['Commands'][y]['bytes']
             elif ascii_flag == 0:
                 bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
+            elif ascii_flag == 2:
+                bytes_s = SF.hex_2_dec(profile['Commands'][y]['bytes'])
             print("byte string" + bytes_s)
             byte_lenght = len(bytes_s)
             if byte_lenght > 30:
@@ -624,7 +628,7 @@ class Optionsframe(tk.Frame):
         ascii_v = tk.StringVar(self)
         ascii_v.set("Select Byte Format")
 
-        ascii_array = ["HEX","ASCII"]
+        ascii_array = ["HEX","DEC","ASCII"]
         ascii_label = tk.Label(self, text="Byte Format: ")
         ascii_label.grid(column=1, row=5, sticky='EW')
         ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array,command=self.change_ascii)
@@ -652,11 +656,17 @@ class Optionsframe(tk.Frame):
         global canvas_command_list
         global ascii_flag
         if(byte_type == "HEX"):
-            ascii_flag=1;
+            ascii_flag=1
             print("Switching to Hex")
         elif(byte_type == "ASCII"):
-            ascii_flag=0;
+            ascii_flag=0
             print("Switching to Ascii")
+        if(byte_type == "HEX"):
+            ascii_flag=1
+            print("Switching to Hex")
+        elif(byte_type == "DEC"):
+            ascii_flag=2
+            print("Switching to Dec")
         #clear global list
         label_CN_list.clear()
         label_byte_list.clear()

@@ -71,6 +71,31 @@ def ascii_2_hex(command):
      hex_string=""
     return hex_string
 
+def hex_2_dec(command):
+    hex_nums = command.split()
+    dec_string=""
+    for x in hex_nums:
+        dec = int(x, 0)
+        dec_string = dec_string + str(dec) + " "
+    return dec_string
+
+
+def dec_2_hex(command):
+    dec_nums = command.split()
+    hex_string=""
+
+    for x in dec_nums:
+        hex_value=""
+        dec = int(x, 0)
+        if dec > 16:
+            hex_value = hex(dec)
+            hex_string = hex_string + hex_value + " "
+        else:
+            hex_value = hex(dec)
+            hex_string = hex_string + hex_value[0:2] + "0" + hex_value[2] + " "
+    return hex_string
+
+
 
 
 
