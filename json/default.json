@@ -1,10 +1,21 @@
 {
-  "Pofile_name": "Default",
-  "Com Port": "COM 11",
-  "Num_Commands": 3,
-  "Commands": [
-    { "name":"C1", "bytes": [0,0,0,0,0]},
-    { "name":"C2", "bytes": [0,0,0,0,0]},
-    { "name":"C3", "bytes": [0,0,0,0,0]}
-  ]
- }
+    "Pofile_name": "Profile 2",
+    "Com Port": "COM3",
+      "Baudrate": 115200,
+      "Interval": 1.0,
+    "Num_Commands": 3,
+    "Commands": [
+        {
+            "name": "C1",
+            "bytes": "0x54 0x45 0x53 0x54 0x2A "
+        },
+        {
+            "name": "C2",
+            "bytes": "0x2A 0x2B 0x2C 0x2D 0x2F "
+        },
+        {
+            "name": "C3",
+            "bytes": "0x3A 0x3B 0x3C 0x3D 0x3F "
+        }
+    ]
+}

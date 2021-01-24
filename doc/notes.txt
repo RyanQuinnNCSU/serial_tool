@@ -14,6 +14,9 @@ https://github.com/israel-dryer/Notepad-Tk
 #using scrollbar
 https://stackoverflow.com/questions/43731784/tkinter-canvas-scrollbar-with-grid
 
+#converting hex number to byte array:
+https://stackoverflow.com/questions/5649407/hexadecimal-string-to-byte-array-in-python
+
 Notes:
 *widgets can be relocated by just changing grid location.
 No need to delete old widget.

@@ -15,6 +15,18 @@ label_byte_list = []
 play_but_list = []
 canvas_list = []
 canvas_command_list = []
+ascii_command_list = []
+transaction_window = []
+interval = []
+#frames:
+top = []
+command = []
+trans = []
+options = []
+tk_tk = []
+startup_flag = 0
+
+ascii_flag = 1 #0 = ascii, 1 = hex
 #****************************** Add Command Window *********************************************
 class SampleApp(tk.Tk):
     def __init__(self):
@@ -22,11 +34,11 @@ class SampleApp(tk.Tk):
         self._frame = None
         self.title("Serial Chatter")
         #self.switch_frame(Main_frame)
-        top = Topframe(self)
-        test = Commandframe(self)
-        trans = Transactionframe(self)
-        options = Optionsframe(self)
-
+        top.append(Topframe(self))
+        command.append(Commandframe(self))
+        trans.append(Transactionframe(self))
+        options.append(Optionsframe(self))
+        tk_tk.append(self)
     def switch_frame(self, frame_class):
         """Destroys current frame and replaces it with a new one."""
         new_frame = frame_class(self)
@@ -34,6 +46,11 @@ class SampleApp(tk.Tk):
             self._frame.destroy()
         self._frame = new_frame
         self._frame.grid()
+
+    def restart_frame(self, frame,tk_tk):
+        frame[0].destroy()
+        frame.pop(0)
+        Commandframe(tk_tk)
 
     def show_frame(self, page_name):
         '''Show a frame for the given page name'''
@@ -84,9 +101,29 @@ class Commandframe(tk.Frame):
     #         B1.grid(column=1, row=2, sticky='WNES')
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
-    def send_serial_command(self,index):
-        print("Command Number" + str(index))
 
+    def send_serial_command(self,index):
+        global unsaved_profile
+        bytes = unsaved_profile['Commands'][index]['bytes']
+        com_port = unsaved_profile['Com Port']
+        baudrate = unsaved_profile['Baudrate']
+        transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+        transaction_window[2].update()
+        SF.send_serial(bytes,com_port,baudrate,transaction_window[2],5)
+
+
+    def update_ascii_commands(self, profile):
+        global ascii_command_list
+        ascii_command_list = profile['Commands']
+        #print(ascii_command_list)
+        name = ""
+        bytes = ""
+        for x in range(0,profile['Num_Commands']):
+            name = ascii_command_list[x]['name']
+            print(name)
+            ascii_command_list[x]['bytes'] = SF.hex_2_ascii(ascii_command_list[x]['bytes'])
+            bytes = ascii_command_list[x]['bytes']
+            print(bytes)
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
@@ -95,8 +132,11 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
+            global ascii_flag
+            global startup_flag
             #load config data
             config = {}
+
             with open("../json/config.json", "r") as read_file:
                 config = json.loads(read_file.read())
                 read_file.close()
@@ -113,8 +153,11 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
-                unsaved_profile = profile
-                num_commands = len(profile['Commands'])
+                if startup_flag == 0:
+                    unsaved_profile = profile
+                    startup_flag=startup_flag + 1
+                #self.update_ascii_commands(unsaved_profile)
+                num_commands = len(unsaved_profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
 
                 vsb.grid(row=0, column=1, sticky='ns')
@@ -125,17 +168,23 @@ class Commandframe(tk.Frame):
                     B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
                     B_P.grid(column=1, row=x+3, sticky='WNES')
                     play_but_list.append(B_P)
-                    name_lenght = len(profile['Commands'][x]['name'])
+                    name_lenght = len(unsaved_profile['Commands'][x]['name'])
                     if name_lenght > 30:
-                        final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+                        final_name_string = unsaved_profile['Commands'][x]['name'][0:29] + " ..."
                     else:
-                        final_name_string = profile['Commands'][x]['name']
+                        final_name_string = unsaved_profile['Commands'][x]['name']
                     CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
                 bytes_s=""
                 for y in range(0,num_commands):
-                    bytes_s = profile['Commands'][y]['bytes']
+                    print("ascii_flag = ", ascii_flag)
+                    if ascii_flag == 1:
+                        bytes_s = unsaved_profile['Commands'][y]['bytes']
+                    elif ascii_flag == 0:
+                        bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][y]['bytes'])
+                    elif ascii_flag == 2:
+                        bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][y]['bytes'])
                     byte_lenght = len(bytes_s)
                     if byte_lenght > 30:
                         final_byte_string = bytes_s[0:29] + " ..."
@@ -164,6 +213,7 @@ class Commandframe(tk.Frame):
         global label_CN_list
         global label_byte_list
         global play_but_list
+        global ascii_flag
         num_commands = len(profile['Commands'])
         print("update_command_list " + str(num_commands))
         print("update_command_list label_CN_List " + str(len(label_CN_list)))
@@ -188,7 +238,13 @@ class Commandframe(tk.Frame):
             label_CN_list.append(CN)
         bytes_s=""
         for y in range(0,num_commands):
-            bytes_s = profile['Commands'][y]['bytes']
+            print("ascii_flag = ", ascii_flag)
+            if ascii_flag == 1:
+                bytes_s = profile['Commands'][y]['bytes']
+            elif ascii_flag == 0:
+                bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
+            elif ascii_flag == 2:
+                bytes_s = SF.hex_2_dec(profile['Commands'][y]['bytes'])
             print("byte string" + bytes_s)
             byte_lenght = len(bytes_s)
             if byte_lenght > 30:
@@ -213,6 +269,7 @@ class Commandframe(tk.Frame):
         main_frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
         main_canvas.config(scrollregion=main_canvas.bbox("all"))
+
 
     def popupmsg(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
         global entry_CN_list
@@ -308,7 +365,13 @@ class Commandframe(tk.Frame):
                 Ex.insert(0, unsaved_profile['Commands'][x]['name'])
                 Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list[x] = Ex
-                bytes_s = unsaved_profile['Commands'][x]['bytes']
+                #bytes_s = unsaved_profile['Commands'][x]['bytes']
+                if ascii_flag == 1:
+                    bytes_s = unsaved_profile['Commands'][x]['bytes']
+                elif ascii_flag == 0:
+                    bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
+                elif ascii_flag == 2:
+                    bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
                 Ey = ttk.Entry(frame_entries,width=80)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
@@ -348,7 +411,13 @@ class Commandframe(tk.Frame):
             Ex.insert(0, profile['Commands'][x]['name'])
             Ex.grid(column=2, row=x, sticky='WNES')
             entry_CN_list[x] = Ex
-            bytes_s = profile['Commands'][x]['bytes']
+            #bytes_s = profile['Commands'][x]['bytes']
+            if ascii_flag == 1:
+                bytes_s = unsaved_profile['Commands'][x]['bytes']
+            elif ascii_flag == 0:
+                bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
+            elif ascii_flag == 2:
+                bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
             Ey = ttk.Entry(frame_entries,width=80)
             Ey.insert(0, bytes_s)
             Ey.grid(column=3, row=x, sticky='WNES')
@@ -451,6 +520,7 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
+            global ascii_flag
             #print("Store Entries")
             print("store_entries " + str(unsaved_profile['Num_Commands']) )
             x=0
@@ -459,7 +529,13 @@ class Commandframe(tk.Frame):
                 x+=1
             y=0
             for entry in entry_byte_list:
-                unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                if ascii_flag == 1:
+                    unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                elif ascii_flag == 0:
+                    unsaved_profile['Commands'][y]['bytes'] = SF.ascii_2_hex(entry.get())
+                elif ascii_flag == 2:
+                    unsaved_profile['Commands'][y]['bytes'] = SF.dec_2_hex(entry.get())
+                #unsaved_profile['Commands'][y]['bytes'] = entry.get()
                 y+=1
             #Update main window.
             for x in range(0,len(play_but_list)):
@@ -486,19 +562,60 @@ class Commandframe(tk.Frame):
 class Transactionframe(tk.Frame):
 
     def __init__(self, master):
-
+        global transaction_window
         tk.Frame.__init__(self, master)
         self.grid(column=1, row=1, sticky=('NSEW'))
-        tk.Label(self, text="Serial Transaction Log").grid(column=1, row=2, sticky='W')
-        text_w = tk.Text(self)
-        text_w.grid(column=1, row=2, sticky='NSEW')
-        text_w.insert(tk.END,"Test")
+
+        #transaction_window: 0-canvas, 1-canvas, id 2-text widget
+
+        tk.Label(self, text="Serial Transaction Log").grid(column=1, row=1, sticky='W')
+
+
+        frame_canvas = tk.Frame(self)
+        frame_canvas.grid(row=2, column=1, sticky='nsew')
+        frame_canvas.grid_rowconfigure(0, weight=1)
+        frame_canvas.grid_columnconfigure(0, weight=1)
+        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
+        frame_canvas.grid_propagate(False)
+
+        # Add a canvas in that frame
+        canvas = tk.Canvas(frame_canvas, bg="yellow")
+        canvas.grid(row=0, column=0, sticky="news")
+        transaction_window.append(canvas)
+        # Create a frame to contain the buttons
+        frame_text = tk.Frame(canvas)
+        id= canvas.create_window((0, 0), window=frame_text, anchor='nw')
+        transaction_window.append(id)
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+
+        vsb.grid(row=0, column=1, sticky='ns')
+        #canvas.configure(yscrollcommand=vsb.set)
+
+        text_w = tk.Text(frame_text)
+        text_w.grid(column=1, row=1, sticky='NSEW')
+        text_w.configure(yscrollcommand=vsb.set)
+        #text_w.insert(tk.END,"Test")
+        transaction_window.append(text_w)
         #text_w.insert(tk.END,"Test2")
+
+        frame_text.update_idletasks()
+
+        columns_width = text_w.winfo_width()
+
+        rows_height = text_w.winfo_height()
+
+        #window_height = remove_but_list[0].winfo_height() * (num_commands)
+        print("vsb width" + str(vsb.winfo_width()) )
+        frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+        #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
+        canvas.config(scrollregion=canvas.bbox("all"))
 
 class Optionsframe(tk.Frame):
 
     def __init__(self, master):
         global unsaved_config
+        global unsaved_profile
+        global interval
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
         #load config data
@@ -512,7 +629,7 @@ class Optionsframe(tk.Frame):
         #Setup Com Port Drop Down Menu.
         com_label = tk.Label(self, text="Serial Device: ")
         com_label.grid(column=1, row=1, sticky='EW')
-        COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'])
+        COM_drop = tk.OptionMenu(self, COM_v, *unsaved_config['COM List'],command=self.get_com)
         COM_drop.config(width=40, font=('Helvetica', 12))
         COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
@@ -535,10 +652,10 @@ class Optionsframe(tk.Frame):
         ascii_v = tk.StringVar(self)
         ascii_v.set("Select Byte Format")
 
-        ascii_array = ["HEX","ASCII"]
+        ascii_array = ["HEX","DEC","ASCII"]
         ascii_label = tk.Label(self, text="Byte Format: ")
         ascii_label.grid(column=1, row=5, sticky='EW')
-        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array)
+        ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array,command=self.change_ascii)
         ascii_drop.config(width=40, font=('Helvetica', 12))
         ascii_drop.grid(column=2, row=5, sticky='W')
 
@@ -551,7 +668,51 @@ class Optionsframe(tk.Frame):
         Interval_entry = ttk.Entry(self)
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
+        interval.append(Interval_entry)
 
+    def change_ascii(self,byte_type):
+        global command
+        global tk_tk
+        global label_CN_list
+        global label_byte_list
+        global play_but_list
+        global canvas_list
+        global canvas_command_list
+        global ascii_flag
+        if(byte_type == "HEX"):
+            ascii_flag=1
+            print("Switching to Hex")
+        elif(byte_type == "ASCII"):
+            ascii_flag=0
+            print("Switching to Ascii")
+        if(byte_type == "HEX"):
+            ascii_flag=1
+            print("Switching to Hex")
+        elif(byte_type == "DEC"):
+            ascii_flag=2
+            print("Switching to Dec")
+        #clear global list
+        label_CN_list.clear()
+        label_byte_list.clear()
+        play_but_list.clear()
+        canvas_list.clear()
+        canvas_command_list.clear()
+        command[0].destroy()
+        command.pop(0)
+        command.append(Commandframe(tk_tk[0]))
+        #print("Test ascii dropdown")
+
+
+    def get_com(self, value):
+        global unsaved_profile
+        print("get com has executed")
+        print("value = "+value)
+        value_index = value.find(":")
+        if(value_index == -1):
+            print('No COM Port Devices found.')
+        else:
+            unsaved_profile['Com Port'] = value[:value_index]
+            print("unsaved_profile com port = " + unsaved_profile['Com Port'])
     def check_COMs(self,frame,COM_drop,COM_v):
         global unsaved_config
         SF.list_ports()
@@ -575,7 +736,7 @@ class Topframe(tk.Frame):
         tk.Button(self, text="Play Script",
                   command=but.play_button).grid(column=1, row=2, sticky='W')
         tk.Button(self, text="Loop",
-                  command=but.loop_button).grid(column=2, row=2, sticky='W')
+                  command=lambda : self.loop_through_serial_commands()).grid(column=2, row=2, sticky='W')
         tk.Button(self, text="Write 2 file",
                   command=but.write_button).grid(column=3, row=2, sticky='W')
         tk.Button(self, text="Clear Terminal",
@@ -596,6 +757,22 @@ class Topframe(tk.Frame):
             json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
             write_file.close()
 
+    def loop_through_serial_commands(self):
+        global unsaved_profile
+        global interval
+        timeout = float(interval[0].get())
+        unsaved_profile['Interval'] = timeout
+        for command in unsaved_profile['Commands']:
+            bytes = command['bytes']
+            com_port = unsaved_profile['Com Port']
+            baudrate = unsaved_profile['Baudrate']
+            command_n = command['name']
+            transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+            transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
+            transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+            transaction_window[2].update()
+            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout)
+        print("End of commmand loop.")
 
 #****************************** Add Command Window *********************************************
 class NewWindow(tk.Frame):
