@@ -760,6 +760,7 @@ class Topframe(tk.Frame):
     def loop_through_serial_commands(self):
         global unsaved_profile
         global interval
+        global ascii_flag
         timeout = float(interval[0].get())
         unsaved_profile['Interval'] = timeout
         for command in unsaved_profile['Commands']:
@@ -769,9 +770,15 @@ class Topframe(tk.Frame):
             command_n = command['name']
             transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
             transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
-            transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+            if ascii_flag == 1:
+                trans_bytes = command['bytes']
+            elif ascii_flag == 0:
+                trans_bytes = SF.hex_2_ascii(command['bytes'])
+            elif ascii_flag == 2:
+                trans_bytes = SF.hex_2_dec(command['bytes'])
+            transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
             transaction_window[2].update()
-            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout)
+            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
         print("End of commmand loop.")
 
 #****************************** Add Command Window *********************************************

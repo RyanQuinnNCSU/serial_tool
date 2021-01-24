@@ -100,7 +100,7 @@ def dec_2_hex(command):
 
 
 
-def send_serial(bytes,com_port,baudrate,transaction_window,timeout):
+def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")
     #remove ' ' from bytes
@@ -141,7 +141,13 @@ def send_serial(bytes,com_port,baudrate,transaction_window,timeout):
         # replace_slash_s = unquoted_s.replace('\\','0')
         # add_spaces_s = replace_slash_s.replace('0x',' 0x')
         # final_rsp_string = add_spaces_s[1:]
-        transaction_window.insert(tk.END,"RX: " + str(final_rsp_string) + "\r\n")
+        if ascii_flag == 1:
+            rsp_bytes = final_rsp_string
+        elif ascii_flag == 0:
+            rsp_bytes = hex_2_ascii(final_rsp_string)
+        elif ascii_flag == 2:
+            rsp_bytes = hex_2_dec(final_rsp_string)
+        transaction_window.insert(tk.END,"RX: " + str(rsp_bytes) + "\r\n")
         transaction_window.insert(tk.END,"********************************************" + "\r\n")
 
 
