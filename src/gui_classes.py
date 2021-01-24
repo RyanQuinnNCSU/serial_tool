@@ -102,14 +102,27 @@ class Commandframe(tk.Frame):
     #         B2.grid(column=2, row=2, sticky='WNES')
     #         popup.mainloop()
 
-    def send_serial_command(self,index):
+    def send_serial_command(self,index): #sending single serial command.
         global unsaved_profile
+        global interval
+        global ascii_flag
+        timeout = float(interval[0].get())
         bytes = unsaved_profile['Commands'][index]['bytes']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
-        transaction_window[2].insert(tk.END,"TX: " + str(bytes) + "\r\n")
+        trans_bytes = ""
+        command_n = unsaved_profile['Commands'][index]['name']
+        transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+        transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
+        if ascii_flag == 1:
+            trans_bytes = bytes
+        elif ascii_flag == 0:
+            trans_bytes = SF.hex_2_ascii(bytes)
+        elif ascii_flag == 2:
+            trans_bytes = SF.hex_2_dec(bytes)
+        transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
         transaction_window[2].update()
-        SF.send_serial(bytes,com_port,baudrate,transaction_window[2],5)
+        SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
 
 
     def update_ascii_commands(self, profile):
@@ -757,7 +770,7 @@ class Topframe(tk.Frame):
             json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
             write_file.close()
 
-    def loop_through_serial_commands(self):
+    def loop_through_serial_commands(self): #sending all serial commands.
         global unsaved_profile
         global interval
         global ascii_flag
