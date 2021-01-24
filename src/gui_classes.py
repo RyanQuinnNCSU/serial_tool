@@ -24,6 +24,7 @@ command = []
 trans = []
 options = []
 tk_tk = []
+startup_flag = 0
 
 ascii_flag = 1 #0 = ascii, 1 = hex
 #****************************** Add Command Window *********************************************
@@ -132,8 +133,10 @@ class Commandframe(tk.Frame):
             global play_but_list
             global unsaved_profile
             global ascii_flag
+            global startup_flag
             #load config data
             config = {}
+
             with open("../json/config.json", "r") as read_file:
                 config = json.loads(read_file.read())
                 read_file.close()
@@ -150,9 +153,11 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
-                unsaved_profile = profile
+                if startup_flag == 0:
+                    unsaved_profile = profile
+                    startup_flag=startup_flag + 1
                 #self.update_ascii_commands(unsaved_profile)
-                num_commands = len(profile['Commands'])
+                num_commands = len(unsaved_profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
 
                 vsb.grid(row=0, column=1, sticky='ns')
@@ -163,11 +168,11 @@ class Commandframe(tk.Frame):
                     B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
                     B_P.grid(column=1, row=x+3, sticky='WNES')
                     play_but_list.append(B_P)
-                    name_lenght = len(profile['Commands'][x]['name'])
+                    name_lenght = len(unsaved_profile['Commands'][x]['name'])
                     if name_lenght > 30:
-                        final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
+                        final_name_string = unsaved_profile['Commands'][x]['name'][0:29] + " ..."
                     else:
-                        final_name_string = profile['Commands'][x]['name']
+                        final_name_string = unsaved_profile['Commands'][x]['name']
                     CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
@@ -175,11 +180,11 @@ class Commandframe(tk.Frame):
                 for y in range(0,num_commands):
                     print("ascii_flag = ", ascii_flag)
                     if ascii_flag == 1:
-                        bytes_s = profile['Commands'][y]['bytes']
+                        bytes_s = unsaved_profile['Commands'][y]['bytes']
                     elif ascii_flag == 0:
-                        bytes_s = SF.hex_2_ascii(profile['Commands'][y]['bytes'])
+                        bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][y]['bytes'])
                     elif ascii_flag == 2:
-                        bytes_s = SF.hex_2_dec(profile['Commands'][y]['bytes'])
+                        bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][y]['bytes'])
                     byte_lenght = len(bytes_s)
                     if byte_lenght > 30:
                         final_byte_string = bytes_s[0:29] + " ..."
@@ -360,7 +365,13 @@ class Commandframe(tk.Frame):
                 Ex.insert(0, unsaved_profile['Commands'][x]['name'])
                 Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list[x] = Ex
-                bytes_s = unsaved_profile['Commands'][x]['bytes']
+                #bytes_s = unsaved_profile['Commands'][x]['bytes']
+                if ascii_flag == 1:
+                    bytes_s = unsaved_profile['Commands'][x]['bytes']
+                elif ascii_flag == 0:
+                    bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
+                elif ascii_flag == 2:
+                    bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
                 Ey = ttk.Entry(frame_entries,width=80)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
@@ -400,7 +411,13 @@ class Commandframe(tk.Frame):
             Ex.insert(0, profile['Commands'][x]['name'])
             Ex.grid(column=2, row=x, sticky='WNES')
             entry_CN_list[x] = Ex
-            bytes_s = profile['Commands'][x]['bytes']
+            #bytes_s = profile['Commands'][x]['bytes']
+            if ascii_flag == 1:
+                bytes_s = unsaved_profile['Commands'][x]['bytes']
+            elif ascii_flag == 0:
+                bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
+            elif ascii_flag == 2:
+                bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
             Ey = ttk.Entry(frame_entries,width=80)
             Ey.insert(0, bytes_s)
             Ey.grid(column=3, row=x, sticky='WNES')
@@ -503,6 +520,7 @@ class Commandframe(tk.Frame):
             global label_byte_list
             global play_but_list
             global unsaved_profile
+            global ascii_flag
             #print("Store Entries")
             print("store_entries " + str(unsaved_profile['Num_Commands']) )
             x=0
@@ -511,7 +529,13 @@ class Commandframe(tk.Frame):
                 x+=1
             y=0
             for entry in entry_byte_list:
-                unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                if ascii_flag == 1:
+                    unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                elif ascii_flag == 0:
+                    unsaved_profile['Commands'][y]['bytes'] = SF.ascii_2_hex(entry.get())
+                elif ascii_flag == 2:
+                    unsaved_profile['Commands'][y]['bytes'] = SF.dec_2_hex(entry.get())
+                #unsaved_profile['Commands'][y]['bytes'] = entry.get()
                 y+=1
             #Update main window.
             for x in range(0,len(play_but_list)):

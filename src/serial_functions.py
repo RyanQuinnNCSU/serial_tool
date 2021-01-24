@@ -3,6 +3,7 @@ import serial
 import tkinter as tk
 from serial.tools import list_ports
 import gui_classes
+import codecs
 import json
 
 config = {}
