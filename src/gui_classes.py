@@ -3,6 +3,7 @@ from tkinter import ttk
 import buttons as but
 import json
 import serial_functions as SF
+import threading
 
 filename = "../json/config.json"
 unsaved_profile={}
@@ -17,14 +18,28 @@ canvas_list = []
 canvas_command_list = []
 ascii_command_list = []
 transaction_window = []
+Listen_mode_send_b = []
+Listen_mode_command=[]
 interval = []
 #frames:
 top = []
 command = []
 trans = []
+trans2 = []
 options = []
 tk_tk = []
 startup_flag = 0
+serial_flag = 0
+listen_mode = False
+
+
+
+
+
+
+
+
+
 
 ascii_flag = 1 #0 = ascii, 1 = hex
 #****************************** Add Command Window *********************************************
@@ -37,6 +52,7 @@ class SampleApp(tk.Tk):
         top.append(Topframe(self))
         command.append(Commandframe(self))
         trans.append(Transactionframe(self))
+        trans2.append(Transactionframe2(self))
         options.append(Optionsframe(self))
         tk_tk.append(self)
     def switch_frame(self, frame_class):
@@ -106,25 +122,32 @@ class Commandframe(tk.Frame):
         global unsaved_profile
         global interval
         global ascii_flag
-        timeout = float(interval[0].get())
-        bytes = unsaved_profile['Commands'][index]['bytes']
-        com_port = unsaved_profile['Com Port']
-        baudrate = unsaved_profile['Baudrate']
-        trans_bytes = ""
-        command_n = unsaved_profile['Commands'][index]['name']
-        transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
-        transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
-        if ascii_flag == 1:
-            trans_bytes = bytes
-        elif ascii_flag == 0:
-            trans_bytes = SF.hex_2_ascii(bytes)
-        elif ascii_flag == 2:
-            trans_bytes = SF.hex_2_dec(bytes)
-        transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
-        transaction_window[2].update()
-        SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
-
-
+        global listen_mode
+        global Listen_mode_command
+        if listen_mode == False:
+            timeout = float(interval[0].get())
+            bytes = unsaved_profile['Commands'][index]['bytes']
+            com_port = unsaved_profile['Com Port']
+            baudrate = unsaved_profile['Baudrate']
+            trans_bytes = ""
+            command_n = unsaved_profile['Commands'][index]['name']
+            transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+            transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
+            if ascii_flag == 1:
+                trans_bytes = bytes
+            elif ascii_flag == 0:
+                trans_bytes = SF.hex_2_ascii(bytes)
+            elif ascii_flag == 2:
+                trans_bytes = SF.hex_2_dec(bytes)
+            transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
+            transaction_window[2].update()
+            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+        else:
+            command_n = unsaved_profile['Commands'][index]['name']
+            #transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+            transaction_window[2].insert(tk.END, "\r\n"  + "Command: " + command_n + "\r\n")
+            Listen_mode_command.clear()
+            Listen_mode_command.append(unsaved_profile['Commands'][index]['bytes'])
     def update_ascii_commands(self, profile):
         global ascii_command_list
         ascii_command_list = profile['Commands']
@@ -588,7 +611,6 @@ class Transactionframe(tk.Frame):
         frame_canvas.grid(row=2, column=1, sticky='nsew')
         frame_canvas.grid_rowconfigure(0, weight=1)
         frame_canvas.grid_columnconfigure(0, weight=1)
-        # Set grid_propagate to False to allow 5-by-5 buttons resizing later
         frame_canvas.grid_propagate(False)
 
         # Add a canvas in that frame
@@ -622,6 +644,37 @@ class Transactionframe(tk.Frame):
         frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
         canvas.config(scrollregion=canvas.bbox("all"))
+
+
+
+class Transactionframe2(tk.Frame):
+
+    def __init__(self, master):
+        global Listen_mode_send_b
+        tk.Frame.__init__(self, master)
+        self.grid(column=1, row=2, sticky=('NSEW'))
+
+        #add label, entry and send button
+        send_label = tk.Label(self, text="Send Data Console (Listen Mode Only)")
+        send_label.grid(column=0, row=0, sticky='EW')
+        input_entry = tk.Entry(self,width=80) #ttk may be needed.
+        input_entry.grid(column=0, row=1, sticky='EW')
+        send_button = ttk.Button(self, text="Send", state="disabled", command =lambda :  self.send_data(input_entry) )
+        send_button.grid(column=1, row=1, sticky='W')
+        Listen_mode_send_b.append(send_button)
+
+    def send_data(self, entry):
+        global ascii_flag
+        global Listen_mode_command
+        Listen_mode_command.clear()
+        command = entry.get()
+        if ascii_flag == 1:
+            bytes = command
+        elif ascii_flag == 0:
+            bytes = hex_2_ascii(command)
+        elif ascii_flag == 2:
+            bytes = hex_2_dec(command)
+        Listen_mode_command.append(command)
 
 class Optionsframe(tk.Frame):
 
@@ -754,6 +807,8 @@ class Topframe(tk.Frame):
                   command=but.write_button).grid(column=3, row=2, sticky='W')
         tk.Button(self, text="Clear Terminal",
                   command=but.clear_button).grid(column=4, row=2, sticky='W')
+        tk.Button(self, text="listen",
+                  command=lambda : self.start_stop_serial_thread()).grid(column=5, row=2, sticky='W')
         #Command table
         # tk.Label(self, text="Command Names").grid(column=2, row=3, sticky='W')
         # tk.Label(self, text="Byte String").grid(column=3, row=3, sticky='W')
@@ -769,30 +824,66 @@ class Topframe(tk.Frame):
         with open(config['Profile'], "w") as write_file:
             json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
             write_file.close()
+    def start_stop_serial_thread(self):
+        global listen_mode
+        global Listen_mode_send_b
+        if listen_mode == False:
+            listen_mode = True
+            Listen_mode_send_b[0].config(state="normal")
+            t = threading.Thread(target = self.serial_listen)
+            t.daemon = True
+            t.start()
+        else:
+            listen_mode = False
+            Listen_mode_send_b[0].config(state="disabled")
+
+    def serial_listen(self):
+        global tk_tk
+        global unsaved_profile
+        global serial_flag
+        global listen_mode
+        global transaction_window
+        global ascii_flag
+        global Listen_mode_command
+        timeout = unsaved_profile['Interval']
+        com_port = unsaved_profile['Com Port']
+        baudrate = unsaved_profile['Baudrate']
+        timeout = 1 #may not need.
+        #if in listen mode and serial line isn't begin used read serial
+        while listen_mode:
+
+            if len(Listen_mode_command) == 0:
+                SF.listener(com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+            else:
+                SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+                Listen_mode_command.clear()
+        #Possibly loop though the gui with this
 
     def loop_through_serial_commands(self): #sending all serial commands.
         global unsaved_profile
         global interval
         global ascii_flag
-        timeout = float(interval[0].get())
-        unsaved_profile['Interval'] = timeout
-        for command in unsaved_profile['Commands']:
-            bytes = command['bytes']
-            com_port = unsaved_profile['Com Port']
-            baudrate = unsaved_profile['Baudrate']
-            command_n = command['name']
-            transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
-            transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
-            if ascii_flag == 1:
-                trans_bytes = command['bytes']
-            elif ascii_flag == 0:
-                trans_bytes = SF.hex_2_ascii(command['bytes'])
-            elif ascii_flag == 2:
-                trans_bytes = SF.hex_2_dec(command['bytes'])
-            transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
-            transaction_window[2].update()
-            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
-        print("End of commmand loop.")
+        global listen_mode
+        if listen_mode == false:
+            timeout = float(interval[0].get())
+            unsaved_profile['Interval'] = timeout
+            for command in unsaved_profile['Commands']:
+                bytes = command['bytes']
+                com_port = unsaved_profile['Com Port']
+                baudrate = unsaved_profile['Baudrate']
+                command_n = command['name']
+                transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
+                transaction_window[2].insert(tk.END,"Command: " + command_n + "\r\n")
+                if ascii_flag == 1:
+                    trans_bytes = command['bytes']
+                elif ascii_flag == 0:
+                    trans_bytes = SF.hex_2_ascii(command['bytes'])
+                elif ascii_flag == 2:
+                    trans_bytes = SF.hex_2_dec(command['bytes'])
+                transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
+                transaction_window[2].update()
+                SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+            print("End of commmand loop.")
 
 #****************************** Add Command Window *********************************************
 class NewWindow(tk.Frame):

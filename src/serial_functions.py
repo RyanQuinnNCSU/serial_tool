@@ -98,7 +98,17 @@ def dec_2_hex(command):
 
 
 
+def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
+    ser = serial.Serial(com_port, baudrate, timeout=timeout)
+    #print("Serial Open")
 
+    response = ser.read(500)
+    print(len(response))
+    # response_decode = response.decode("hex")
+    ser.close()
+    if len(response) > 0:
+        print("Serial Response = " + str(response))
+        response_s = str(response)
 
 def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag):
     #remove '0x' from bytes
