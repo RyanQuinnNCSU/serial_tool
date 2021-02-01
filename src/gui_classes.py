@@ -141,7 +141,7 @@ class Commandframe(tk.Frame):
                 trans_bytes = SF.hex_2_dec(bytes)
             transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
             transaction_window[2].update()
-            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
         else:
             command_n = unsaved_profile['Commands'][index]['name']
             #transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
@@ -671,10 +671,12 @@ class Transactionframe2(tk.Frame):
         if ascii_flag == 1:
             bytes = command
         elif ascii_flag == 0:
-            bytes = hex_2_ascii(command)
+            bytes = SF.ascii_2_hex(command)
         elif ascii_flag == 2:
-            bytes = hex_2_dec(command)
-        Listen_mode_command.append(command)
+            bytes = SF.dec_2_hex(command)
+        print("bytes = " + str(bytes))
+        print("command = " + str(command))
+        Listen_mode_command.append(bytes)
 
 class Optionsframe(tk.Frame):
 
@@ -855,7 +857,16 @@ class Topframe(tk.Frame):
             if len(Listen_mode_command) == 0:
                 SF.listener(com_port,baudrate,transaction_window[2],timeout,ascii_flag)
             else:
-                SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+                trans_bytes = ""
+                if ascii_flag == 1:
+                    trans_bytes = Listen_mode_command[0]
+                elif ascii_flag == 0:
+                    trans_bytes = SF.hex_2_ascii(Listen_mode_command[0])
+                elif ascii_flag == 2:
+                    trans_bytes = SF.hex_2_dec(Listen_mode_command[0])
+                transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
+                transaction_window[2].update()
+                SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
                 Listen_mode_command.clear()
         #Possibly loop though the gui with this
 
@@ -882,7 +893,7 @@ class Topframe(tk.Frame):
                     trans_bytes = SF.hex_2_dec(command['bytes'])
                 transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
                 transaction_window[2].update()
-                SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+                SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
             print("End of commmand loop.")
 
 #****************************** Add Command Window *********************************************

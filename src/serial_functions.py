@@ -103,14 +103,32 @@ def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
     #print("Serial Open")
 
     response = ser.read(500)
-    print(len(response))
+    #print(len(response))
     # response_decode = response.decode("hex")
     ser.close()
     if len(response) > 0:
         print("Serial Response = " + str(response))
         response_s = str(response)
+        response_redo = response.hex()
+        final_rsp_string = "0x" + response_redo[0:2]
+        redo_len = len(response_redo)//2
 
-def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag):
+        for x in range(1,redo_len):
+            start = x*2
+            end = x*2 + 2
+            final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
+        final_rsp_string = final_rsp_string
+        #print("response redo = " + final_rsp_string)
+        if ascii_flag == 1:
+            rsp_bytes = final_rsp_string  + " "
+        elif ascii_flag == 0:
+            rsp_bytes = hex_2_ascii(final_rsp_string)  + " "
+        elif ascii_flag == 2:
+            rsp_bytes = hex_2_dec(final_rsp_string)
+        transaction_window.insert(tk.END,str(rsp_bytes))
+
+
+def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag,listen_mode):
     #remove '0x' from bytes
     byte_s1 = bytes.replace("0x", "")
     #remove ' ' from bytes
@@ -141,10 +159,11 @@ def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag):
         end = x*2 + 2
         final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
     print("response redo = " + final_rsp_string)
-    first_qm = response_s.find('\'')
-    if(first_qm == -1):
-        transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
-        transaction_window[2].insert(tk.END,"****" + "\r\n")
+    #first_qm = response_s.find('\'')
+    if len(response_redo) <= 2:  #(first_qm == -1):
+        if listen_mode ==  False:
+            transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
+            transaction_window.insert(tk.END,"********************************************" + "\r\n")
     else:
         # second_gm = response_s.find('\'',first_qm +1)
         # unquoted_s = response_s[first_qm+1:second_gm]
@@ -157,9 +176,11 @@ def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag):
             rsp_bytes = hex_2_ascii(final_rsp_string)
         elif ascii_flag == 2:
             rsp_bytes = hex_2_dec(final_rsp_string)
-        transaction_window.insert(tk.END,"RX: " + str(rsp_bytes) + "\r\n")
-        transaction_window.insert(tk.END,"********************************************" + "\r\n")
-
+        if listen_mode ==  False:
+            transaction_window.insert(tk.END,"RX: " + str(rsp_bytes) + "\r\n")
+            transaction_window.insert(tk.END,"********************************************" + "\r\n")
+        else:
+            transaction_window.insert(tk.END,str(rsp_bytes))
 
 
 if __name__ == "__main__":
