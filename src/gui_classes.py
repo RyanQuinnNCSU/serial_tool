@@ -864,7 +864,7 @@ class Topframe(tk.Frame):
                     trans_bytes = SF.hex_2_ascii(Listen_mode_command[0])
                 elif ascii_flag == 2:
                     trans_bytes = SF.hex_2_dec(Listen_mode_command[0])
-                transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
+                transaction_window[2].insert(tk.END,"\r\nTX: " + trans_bytes + "\r\n")
                 transaction_window[2].update()
                 SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
                 Listen_mode_command.clear()
