@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 import buttons as but
 import json
 import serial_functions as SF
@@ -31,6 +32,7 @@ tk_tk = []
 startup_flag = 0
 serial_flag = 0
 listen_mode = False
+profile_filename = ""
 
 
 
@@ -800,7 +802,6 @@ class Topframe(tk.Frame):
         #Button Ribbon
         tk.Button(self, text="TMP Save",
                   command=lambda : self.temp_save_button() ).grid(column=1, row=1, sticky='W')
-
         tk.Button(self, text="Play Script",
                   command=but.play_button).grid(column=1, row=2, sticky='W')
         tk.Button(self, text="Loop",
@@ -818,6 +819,12 @@ class Topframe(tk.Frame):
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=2, row=4, sticky='W')
         # tk.Button(self, text="Add Bytes",
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=3, row=4, sticky='W')
+        tk.Button(self, text='Switch Profile', command=self.switch_profile).grid(column=6, row=2, sticky='W')
+    def switch_profile(self):
+        global profile_filename
+        profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
+        print(profile_filename)
+
     def temp_save_button(self):
         config = {}
         with open("../json/config.json", "r") as read_file:
