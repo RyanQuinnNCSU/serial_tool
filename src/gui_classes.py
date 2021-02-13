@@ -39,7 +39,22 @@ profile_filename = ""
 
 
 
-
+def restart_frame(frame_flag):
+    #Flags: top = 0, command = 1, trans = 3, trans2 = 4, options=5
+    #clear global list
+    if frame_flag == 1: #command frame
+        label_CN_list.clear()
+        label_byte_list.clear()
+        play_but_list.clear()
+        canvas_list.clear()
+        canvas_command_list.clear()
+        command[0].destroy()
+        command.pop(0)
+        command.append(Commandframe(tk_tk[0]))
+    if frame_flag == 5:
+        options[0].destroy()
+        options.pop(0)
+        options.append(Commandframe(tk_tk[0]))
 
 
 
@@ -191,9 +206,10 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
-                if startup_flag == 0:
-                    unsaved_profile = profile
-                    startup_flag=startup_flag + 1
+                # if startup_flag == 0:
+                #     unsaved_profile = profile
+                #     startup_flag=startup_flag + 1
+                unsaved_profile = profile
                 #self.update_ascii_commands(unsaved_profile)
                 num_commands = len(unsaved_profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
@@ -820,13 +836,22 @@ class Topframe(tk.Frame):
         # tk.Button(self, text="Add Bytes",
         #           command=lambda: master.switch_frame(Testwindow)).grid(column=3, row=4, sticky='W')
         tk.Button(self, text='Switch Profile', command=self.switch_profile).grid(column=6, row=2, sticky='W')
+
     def switch_profile(self):
         global profile_filename
         #comemented line opens file
         #profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
-        filename = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = [("Json",'*.json')])
-        print(filename)
-
+        selected_profile = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = [("Json",'*.json')])
+        print(selected_profile)
+        config = {}
+        with open("../json/config.json", "r") as config_file:
+            config = json.loads(config_file.read())
+            config_file.close()
+        config['Profile'] = selected_profile
+        with open("../json/config.json", "w") as config_file:
+            json.dump(config, config_file, ensure_ascii=False, indent=4)
+            config_file.close()
+        restart_frame(1)
 
     def temp_save_button(self):
         config = {}
@@ -836,6 +861,7 @@ class Topframe(tk.Frame):
         with open(config['Profile'], "w") as write_file:
             json.dump(unsaved_profile, write_file, ensure_ascii=False, indent=4)
             write_file.close()
+
     def start_stop_serial_thread(self):
         global listen_mode
         global Listen_mode_send_b
