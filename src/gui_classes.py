@@ -822,8 +822,11 @@ class Topframe(tk.Frame):
         tk.Button(self, text='Switch Profile', command=self.switch_profile).grid(column=6, row=2, sticky='W')
     def switch_profile(self):
         global profile_filename
-        profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
-        print(profile_filename)
+        #comemented line opens file
+        #profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
+        filename = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = [("Json",'*.json')])
+        print(filename)
+
 
     def temp_save_button(self):
         config = {}
