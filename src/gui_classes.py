@@ -5,6 +5,7 @@ import buttons as but
 import json
 import serial_functions as SF
 import threading
+import os
 
 filename = "../json/config.json"
 unsaved_profile={}
@@ -16,6 +17,7 @@ label_CN_list = []
 label_byte_list = []
 play_but_list = []
 canvas_list = []
+top_widgets_list = []
 canvas_command_list = []
 ascii_command_list = []
 transaction_window = []
@@ -815,30 +817,67 @@ class Topframe(tk.Frame):
         tk.Frame.__init__(self, master, borderwidth = 10) #relief="solid" will make boarder a solid color
         self.grid(column=0, row=0, sticky=('EW'))
         master.state('zoomed')
+
+        global top_widgets_list
         #Button Ribbon
-        tk.Button(self, text="TMP Save",
-                  command=lambda : self.temp_save_button() ).grid(column=1, row=1, sticky='W')
-        tk.Button(self, text="Play Script",
-                  command=but.play_button).grid(column=1, row=2, sticky='W')
-        tk.Button(self, text="Loop",
-                  command=lambda : self.loop_through_serial_commands()).grid(column=2, row=2, sticky='W')
-        tk.Button(self, text="Write 2 file",
-                  command=but.write_button).grid(column=3, row=2, sticky='W')
-        tk.Button(self, text="Clear Terminal",
-                  command=but.clear_button).grid(column=4, row=2, sticky='W')
-        tk.Button(self, text="listen",
-                  command=lambda : self.start_stop_serial_thread()).grid(column=5, row=2, sticky='W')
-        #Command table
-        # tk.Label(self, text="Command Names").grid(column=2, row=3, sticky='W')
-        # tk.Label(self, text="Byte String").grid(column=3, row=3, sticky='W')
-        # tk.Button(self, text="Add Name",
-        #           command=lambda: master.switch_frame(Testwindow)).grid(column=2, row=4, sticky='W')
-        # tk.Button(self, text="Add Bytes",
-        #           command=lambda: master.switch_frame(Testwindow)).grid(column=3, row=4, sticky='W')
-        tk.Button(self, text='Switch Profile', command=self.switch_profile).grid(column=6, row=2, sticky='W')
+
+        #save profile changes
+        save_b = tk.Button(self, text="TMP Save", command=lambda : self.temp_save_button() )
+        save_b.grid(column=1, row=1, sticky='W')
+        top_widgets_list.append(save_b)
+
+        #Not in use, may delete later
+        NIU = tk.Button(self, text="Not in use", command=but.play_button)
+        NIU.grid(column=1, row=2, sticky='W')
+        top_widgets_list.append(NIU)
+
+        #Play List of commands
+        play_loop = tk.Button(self, text="Loop", command=lambda : self.loop_through_serial_commands())
+        play_loop.grid(column=2, row=2, sticky='W')
+        top_widgets_list.append(play_loop)
+
+        #Write transaction log to file
+        write_2_log = tk.Button(self, text="Write 2 file",command=but.write_button)
+        write_2_log.grid(column=3, row=2, sticky='W')
+        top_widgets_list.append(write_2_log)
+
+        #Clear Transaction Terminal
+        clear_trans = tk.Button(self, text="Clear Terminal", command=but.clear_button)
+        clear_trans.grid(column=4, row=2, sticky='W')
+        top_widgets_list.append(clear_trans)
+
+        #Start-Stop Listen Mode
+        listen_m = tk.Button(self, text="listen", command=lambda : self.start_stop_serial_thread())
+        listen_m.grid(column=5, row=2, sticky='W')
+        top_widgets_list.append(listen_m)
+
+        #Switch Profile
+        switch_p = tk.Button(self, text='Switch Profile', command=self.switch_profile)
+        switch_p.grid(column=6, row=2, sticky='W')
+        top_widgets_list.append(switch_p)
+
+        #print profile in use in label
+        profile_name =  self.get_profile_name()
+        profile_label_text = "Active Profile: " + profile_name
+        my_profile_var = tk.StringVar()
+        my_profile_var.set(profile_label_text)
+        profile_label = tk.Label(self, textvariable=my_profile_var)
+        profile_label.grid(column=7, row=2, sticky='E')
+        top_widgets_list.append(profile_label)
+        top_widgets_list.append(my_profile_var)
+
+        #top_widgets_list index: 0=save, 1=NIU, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= profile label, 8=my_profile_var
+
+    def get_profile_name(self):
+        with open("../json/config.json", "r") as config_file:
+            config = json.loads(config_file.read())
+            config_file.close()
+        profile_name_w_path = config['Profile']
+        return os.path.basename(profile_name_w_path)
 
     def switch_profile(self):
         global profile_filename
+        global top_widgets_list
         #comemented line opens file
         #profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
         selected_profile = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = [("Json",'*.json')])
@@ -852,6 +891,10 @@ class Topframe(tk.Frame):
             json.dump(config, config_file, ensure_ascii=False, indent=4)
             config_file.close()
         restart_frame(1)
+        #change label to reflect new profile.
+        profile_name =  self.get_profile_name()
+        profile_label_text = "Active Profile: " + profile_name
+        top_widgets_list[8].set(profile_label_text) #set label string var to new profile
 
     def temp_save_button(self):
         config = {}
