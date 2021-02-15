@@ -35,6 +35,7 @@ startup_flag = 0
 serial_flag = 0
 listen_mode = False
 profile_filename = ""
+reason_4_start = 0 # 0=firstboot, 1=change_byte_format, 2=switch_profile
 
 
 
@@ -56,7 +57,7 @@ def restart_frame(frame_flag):
     if frame_flag == 5:
         options[0].destroy()
         options.pop(0)
-        options.append(Commandframe(tk_tk[0]))
+        options.append(Optionsframe(tk_tk[0]))
 
 
 
@@ -189,6 +190,7 @@ class Commandframe(tk.Frame):
             global unsaved_profile
             global ascii_flag
             global startup_flag
+            global reason_4_start
             #load config data
             config = {}
 
@@ -208,10 +210,16 @@ class Commandframe(tk.Frame):
                 with open(config['Profile'], "r") as read_file:
                     profile = json.loads(read_file.read())
                     read_file.close()
-                # if startup_flag == 0:
-                #     unsaved_profile = profile
-                #     startup_flag=startup_flag + 1
-                unsaved_profile = profile
+                if reason_4_start == 0 or reason_4_start == 2 :
+                     unsaved_profile = profile
+
+
+                if unsaved_profile['Byte Format'] == "ASCII":
+                    ascii_flag = 0
+                elif unsaved_profile['Byte Format'] == "HEX":
+                    ascii_flag = 1
+                elif unsaved_profile['Byte Format'] == "DEC":
+                    ascii_flag = 2
                 #self.update_ascii_commands(unsaved_profile)
                 num_commands = len(unsaved_profile['Commands'])
                 print("Number of Commands " + str(num_commands) )
@@ -713,7 +721,19 @@ class Optionsframe(tk.Frame):
             read_file.close()
         unsaved_config = config
         COM_v = tk.StringVar(self)
-        COM_v.set("COM Port")
+        check_com_match = False
+        com_s = unsaved_profile['Com Port']
+        for port in unsaved_config['COM List']:
+            end_of_com = port.find(":")
+            if end_of_com != -1:
+                com_match = port[:end_of_com].find(com_s)
+                if com_match != -1:
+                    check_com_match = True
+        if check_com_match:
+            COM_v.set(com_s + "  Device Active")
+        else:
+            COM_v.set(com_s + "  Device Inactive")
+        #COM_v.set("COM Port")
         #Setup Com Port Drop Down Menu.
         com_label = tk.Label(self, text="Serial Device: ")
         com_label.grid(column=1, row=1, sticky='EW')
@@ -738,8 +758,14 @@ class Optionsframe(tk.Frame):
         space2.grid(column=1, row=4,sticky='WENS')
 
         ascii_v = tk.StringVar(self)
-        ascii_v.set("Select Byte Format")
-
+        #ascii_v.set("Select Byte Format")
+        #set starting value of ascii dropdown to be bootup value from profile
+        if ascii_flag == 0:
+            ascii_v.set("ASCII")
+        elif ascii_flag == 1:
+            ascii_v.set("HEX")
+        elif ascii_flag == 2:
+            ascii_v.set("DEC")
         ascii_array = ["HEX","DEC","ASCII"]
         ascii_label = tk.Label(self, text="Byte Format: ")
         ascii_label.grid(column=1, row=5, sticky='EW')
@@ -767,19 +793,23 @@ class Optionsframe(tk.Frame):
         global canvas_list
         global canvas_command_list
         global ascii_flag
+        global unsaved_profile
+        global reason_4_start
         if(byte_type == "HEX"):
             ascii_flag=1
+            unsaved_profile['Byte Format'] = "HEX"
             print("Switching to Hex")
         elif(byte_type == "ASCII"):
             ascii_flag=0
+            unsaved_profile['Byte Format'] = "ASCII"
             print("Switching to Ascii")
-        if(byte_type == "HEX"):
-            ascii_flag=1
-            print("Switching to Hex")
         elif(byte_type == "DEC"):
             ascii_flag=2
+            unsaved_profile['Byte Format'] = "DEC"
             print("Switching to Dec")
+
         #clear global list
+        reason_4_start = 1
         label_CN_list.clear()
         label_byte_list.clear()
         play_but_list.clear()
@@ -809,7 +839,7 @@ class Optionsframe(tk.Frame):
             read_file.close()
         COM_drop.grid_forget()
         COM_drop = tk.OptionMenu(frame, COM_v, *unsaved_config['COM List'])
-        COM_drop.config(width=90, font=('Helvetica', 12))
+        COM_drop.config(width=40, font=('Helvetica', 12))
         COM_drop.grid(column=2, row=1, sticky='W')
 
 class Topframe(tk.Frame):
@@ -878,6 +908,7 @@ class Topframe(tk.Frame):
     def switch_profile(self):
         global profile_filename
         global top_widgets_list
+        global reason_4_start
         #comemented line opens file
         #profile_filename = filedialog.askopenfile(parent=self,mode='rb',title='Choose a file')
         selected_profile = filedialog.askopenfilename(initialdir = "/", title = "Select a File", filetypes = [("Json",'*.json')])
@@ -890,7 +921,9 @@ class Topframe(tk.Frame):
         with open("../json/config.json", "w") as config_file:
             json.dump(config, config_file, ensure_ascii=False, indent=4)
             config_file.close()
+        reason_4_start = 2
         restart_frame(1)
+        restart_frame(5)
         #change label to reflect new profile.
         profile_name =  self.get_profile_name()
         profile_label_text = "Active Profile: " + profile_name

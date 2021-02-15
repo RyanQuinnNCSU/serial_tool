@@ -1,7 +1,8 @@
 {
-    "Profile": "C:/Users/rquin/Documents/Coding Projects/serial_tool/json/profile3.json",
+    "Profile": "C:/Users/rquin/Documents/Coding Projects/serial_tool/json/profile1.json",
     "COM List": [
-        "No Devices Detected"
+        "COM3: Silicon Labs CP210x USB to UART Bridge ",
+        "COM5: Silicon Labs CP210x USB to UART Bridge "
     ],
     "Selected Port": "None"
 }
