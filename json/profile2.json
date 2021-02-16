@@ -1,5 +1,4 @@
 {
-    "Pofile_name": "Profile 2",
     "Com Port": "COM5",
     "Baudrate": 115200,
     "Interval": 1.0,
