@@ -69,11 +69,19 @@ class SampleApp(tk.Tk):
         self._frame = None
         self.title("Serial Chatter")
         #self.switch_frame(Main_frame)
-        top.append(Topframe(self))
-        command.append(Commandframe(self))
-        trans.append(Transactionframe(self))
-        trans2.append(Transactionframe2(self))
-        options.append(Optionsframe(self))
+        self.state('zoomed')
+        upper_frame = tk.Frame(self)
+        upper_frame.grid(row=0, sticky="news")
+
+        top.append(Topframe(upper_frame))
+
+        lower_frame = tk.Frame(self)
+        lower_frame.grid(row=1, sticky="news")
+
+        command.append(Commandframe(lower_frame))
+        trans.append(Transactionframe(lower_frame))
+        trans2.append(Transactionframe2(lower_frame))
+        options.append(Optionsframe(lower_frame))
         tk_tk.append(self)
     def switch_frame(self, frame_class):
         """Destroys current frame and replaces it with a new one."""
@@ -846,10 +854,19 @@ class Topframe(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master, borderwidth = 10) #relief="solid" will make boarder a solid color
         self.grid(column=0, row=0, sticky=('EW'))
-        master.state('zoomed')
+
 
         global top_widgets_list
         #Button Ribbon
+        # frame_canvas = tk.Frame(self)
+        # frame_canvas.grid(row=2, column=1, sticky='nsew')
+        # frame_canvas.grid_rowconfigure(0, weight=1)
+        # frame_canvas.grid_columnconfigure(0, weight=1)
+        # frame_canvas.grid_propagate(False)
+        # canvas = tk.Canvas(frame_canvas, bg="yellow")
+        # canvas.grid(row=0, column=0, sticky="news")
+        # frame_ribbon = tk.Frame(canvas)
+        # id= canvas.create_window((0, 0), window=frame_ribbon, anchor='nw')
 
         #save profile changes
         save_b = tk.Button(self, text="Save", command=lambda : self.temp_save_button() )
@@ -888,7 +905,7 @@ class Topframe(tk.Frame):
 
         #print profile in use in label
         profile_name =  self.get_profile_name()
-        profile_label_text = "Active Profile: " + profile_name
+        profile_label_text = "|| Active Profile: " + profile_name + " ||"
         my_profile_var = tk.StringVar()
         my_profile_var.set(profile_label_text)
         profile_label = tk.Label(self, textvariable=my_profile_var)
@@ -896,7 +913,26 @@ class Topframe(tk.Frame):
         top_widgets_list.append(profile_label)
         top_widgets_list.append(my_profile_var)
 
-        #top_widgets_list index: 0=save, 1=new, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= profile label, 8=my_profile_var
+        #label for listen mode
+        listen_var = tk.StringVar()
+        listen_var.set("                     ")
+        listen_label = tk.Label(self, textvariable=listen_var)
+        listen_label.grid(column=8, row=2, sticky='E')
+        top_widgets_list.append(listen_label)
+        top_widgets_list.append(listen_var)
+
+
+
+        # frame_ribbon.update_idletasks()
+        # columns_width = save_b.winfo_width() + new_b.winfo_width() + play_loop.winfo_width() + write_2_log.winfo_width() + clear_trans.winfo_width() + listen_m.winfo_width() + switch_p.winfo_width() + profile_label.winfo_width() + listen_label.winfo_width()
+        # rows_height = save_b.winfo_height()
+        #
+        # #window_height = remove_but_list[0].winfo_height() * (num_commands)
+        # #print("vsb width" + str(vsb.winfo_width()) )
+        # frame_canvas.config(width=columns_width, height=rows_height)
+
+
+        #top_widgets_list index: 0=save, 1=new, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= profile label, 8=my_profile_var, 9=listen label, 10= listen var
 
 
     def new_profile(self):
@@ -916,7 +952,7 @@ class Topframe(tk.Frame):
             config_file.close()
         #change label to reflect new profile.
         profile_name =  self.get_profile_name()
-        profile_label_text = "Active Profile: " + profile_name
+        profile_label_text = "|| Active Profile: " + profile_name + " ||"
         top_widgets_list[8].set(profile_label_text) #set label string var to new profile
 
 
@@ -948,7 +984,7 @@ class Topframe(tk.Frame):
         restart_frame(5)
         #change label to reflect new profile.
         profile_name =  self.get_profile_name()
-        profile_label_text = "Active Profile: " + profile_name
+        profile_label_text = "|| Active Profile: " + profile_name + " ||"
         top_widgets_list[8].set(profile_label_text) #set label string var to new profile
 
     def temp_save_button(self):
@@ -963,13 +999,16 @@ class Topframe(tk.Frame):
     def start_stop_serial_thread(self):
         global listen_mode
         global Listen_mode_send_b
+        global top_widgets_list
         if listen_mode == False:
+            top_widgets_list[10].set(" Listen Mode Active ||")
             listen_mode = True
             Listen_mode_send_b[0].config(state="normal")
             t = threading.Thread(target = self.serial_listen)
             t.daemon = True
             t.start()
         else:
+            top_widgets_list[10].set("                     ")
             listen_mode = False
             Listen_mode_send_b[0].config(state="disabled")
 
@@ -1009,7 +1048,7 @@ class Topframe(tk.Frame):
         global interval
         global ascii_flag
         global listen_mode
-        if listen_mode == false:
+        if listen_mode == False:
             timeout = float(interval[0].get())
             unsaved_profile['Interval'] = timeout
             for command in unsaved_profile['Commands']:
