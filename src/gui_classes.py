@@ -889,7 +889,7 @@ class Topframe(tk.Frame):
         top_widgets_list.append(write_2_log)
 
         #Clear Transaction Terminal
-        clear_trans = tk.Button(self, text="Clear Terminal", command=but.clear_button)
+        clear_trans = tk.Button(self, text="Clear Terminal", command=lambda : self.clear_trans())
         clear_trans.grid(column=4, row=2, sticky='W')
         top_widgets_list.append(clear_trans)
 
@@ -943,6 +943,9 @@ class Topframe(tk.Frame):
             write_file.write(contents)
             write_file.close()
 
+    def clear_trans(self):
+        global transaction_window
+        contents = transaction_window[2].delete("1.0",'end-1c')
 
     def new_profile(self):
         unsaved_profile
