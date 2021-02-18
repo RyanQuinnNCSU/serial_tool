@@ -884,7 +884,7 @@ class Topframe(tk.Frame):
         top_widgets_list.append(play_loop)
 
         #Write transaction log to file
-        write_2_log = tk.Button(self, text="Write 2 file",command=but.write_button)
+        write_2_log = tk.Button(self, text="Write 2 file",command=lambda : self.write_2_file())
         write_2_log.grid(column=3, row=2, sticky='W')
         top_widgets_list.append(write_2_log)
 
@@ -933,6 +933,15 @@ class Topframe(tk.Frame):
 
 
         #top_widgets_list index: 0=save, 1=new, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= profile label, 8=my_profile_var, 9=listen label, 10= listen var
+
+    def write_2_file(self):
+        global transaction_window
+        contents = transaction_window[2].get("1.0",'end-1c')
+        log_file = filedialog.asksaveasfilename(filetypes = [("Text",'*.txt')])
+        print(log_file)
+        with open(log_file, "w") as write_file:
+            write_file.write(contents)
+            write_file.close()
 
 
     def new_profile(self):
@@ -1048,6 +1057,7 @@ class Topframe(tk.Frame):
         global interval
         global ascii_flag
         global listen_mode
+        global transaction_window
         if listen_mode == False:
             timeout = float(interval[0].get())
             unsaved_profile['Interval'] = timeout
