@@ -425,8 +425,10 @@ class Commandframe(tk.Frame):
                 remove_button_ph = ttk.Button(frame_entries)
                 remove_but_list.append(remove_button_ph)
                 Ex_ph = ttk.Entry(frame_entries,width=30)
+                Ex_ph.bind("<Button-3>", RightClicker)
                 entry_CN_list.append(Ex_ph)
                 Ey_ph = ttk.Entry(frame_entries,width=80)
+                Ey_ph.bind("<Button-3>", RightClicker)
                 entry_byte_list.append(Ey_ph)
             for x in range(0,num_commands):
                 index = x
@@ -434,6 +436,7 @@ class Commandframe(tk.Frame):
                 remove_button.grid(column=1, row=x, sticky='WNES')
                 remove_but_list[x] = remove_button
                 Ex = ttk.Entry(frame_entries,width=30)
+                Ex.bind("<Button-3>", RightClicker)
                 Ex.insert(0, unsaved_profile['Commands'][x]['name'])
                 Ex.grid(column=2, row=x, sticky='WNES')
                 entry_CN_list[x] = Ex
@@ -445,6 +448,7 @@ class Commandframe(tk.Frame):
                 elif ascii_flag == 2:
                     bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
                 Ey = ttk.Entry(frame_entries,width=80)
+                Ey.bind("<Button-3>", RightClicker)
                 Ey.insert(0, bytes_s)
                 Ey.grid(column=3, row=x, sticky='WNES')
                 entry_byte_list[x] = Ey
@@ -480,6 +484,7 @@ class Commandframe(tk.Frame):
             remove_button.grid(column=1, row=x, sticky='WNES')
             remove_but_list[x] = remove_button
             Ex = ttk.Entry(frame_entries,width=30)
+            Ex.bind("<Button-3>", RightClicker)
             Ex.insert(0, profile['Commands'][x]['name'])
             Ex.grid(column=2, row=x, sticky='WNES')
             entry_CN_list[x] = Ex
@@ -491,6 +496,7 @@ class Commandframe(tk.Frame):
             elif ascii_flag == 2:
                 bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
             Ey = ttk.Entry(frame_entries,width=80)
+            Ey.bind("<Button-3>", RightClicker)
             Ey.insert(0, bytes_s)
             Ey.grid(column=3, row=x, sticky='WNES')
             entry_byte_list[x] = Ey
@@ -575,8 +581,10 @@ class Commandframe(tk.Frame):
         remove_button_ph = ttk.Button(frame_entries)
         remove_but_list.append(remove_button_ph)
         Ex_ph = ttk.Entry(frame_entries,width=30)
+        Ex_ph.bind("<Button-3>", RightClicker)
         entry_CN_list.append(Ex_ph)
         Ey_ph = ttk.Entry(frame_entries,width=30)
+        Ey_ph.bind("<Button-3>", RightClicker)
         entry_byte_list.append(Ey_ph)
         empty_command = { "name":"", "bytes": ""}
         unsaved_profile['Commands'].append(empty_command)
@@ -694,6 +702,7 @@ class Transactionframe2(tk.Frame):
         send_label = tk.Label(self, text="Send Data Console (Listen Mode Only)")
         send_label.grid(column=0, row=0, sticky='EW')
         input_entry = tk.Entry(self,width=80) #ttk may be needed.
+        input_entry.bind("<Button-3>", RightClicker)
         input_entry.grid(column=0, row=1, sticky='EW')
         send_button = ttk.Button(self, text="Send", state="disabled", command =lambda :  self.send_data(input_entry) )
         send_button.grid(column=1, row=1, sticky='W')
@@ -761,6 +770,7 @@ class Optionsframe(tk.Frame):
         baudrate_entry = ttk.Entry(self)
         baudrate_entry.insert(0, baudrate)
         baudrate_entry.grid(column=2, row=3, sticky='WE')
+        baudrate_entry.bind("<Button-3>", RightClicker)
 
         space2 = tk.Label(self)
         space2.grid(column=1, row=4,sticky='WENS')
@@ -790,6 +800,7 @@ class Optionsframe(tk.Frame):
         Interval_entry = ttk.Entry(self)
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
+        Interval_entry.bind("<Button-3>", RightClicker)
         interval.append(Interval_entry)
 
     def change_ascii(self,byte_type):
@@ -1082,7 +1093,23 @@ class Topframe(tk.Frame):
                 SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
             print("End of commmand loop.")
 
-#****************************** Add Command Window *********************************************
+class RightClicker: #from: https://stackoverflow.com/questions/57701023/tkinter-notepad-program-trying-to-make-a-right-click-copy-paste-option-really-ne
+    def __init__(self, e):
+        commands = ["Cut","Copy","Paste"]
+        menu = tk.Menu(None, tearoff=0, takefocus=0)
+
+        for txt in commands:
+            menu.add_command(label=txt, command=lambda e=e,txt=txt:self.click_command(e,txt))
+
+        menu.tk_popup(e.x_root + 40, e.y_root + 10, entry="0")
+
+    def click_command(self, e, cmd):
+        e.widget.event_generate(f'<<{cmd}>>')
+
+
+
+
+
 class NewWindow(tk.Frame):
 
     def __init__(self, master):
