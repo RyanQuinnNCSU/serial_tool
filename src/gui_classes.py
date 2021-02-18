@@ -671,6 +671,7 @@ class Transactionframe(tk.Frame):
         #canvas.configure(yscrollcommand=vsb.set)
 
         text_w = tk.Text(frame_text)
+        text_w.bind("<Button-3>", RightClicker_trans)
         text_w.grid(column=1, row=1, sticky='NSEW')
         text_w.configure(yscrollcommand=vsb.set)
         #text_w.insert(tk.END,"Test")
@@ -688,8 +689,6 @@ class Transactionframe(tk.Frame):
         frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
         #main_canvas.itemconfig(canvas_command_list[1],height=window_height)
         canvas.config(scrollregion=canvas.bbox("all"))
-
-
 
 class Transactionframe2(tk.Frame):
 
@@ -1107,7 +1106,18 @@ class RightClicker: #from: https://stackoverflow.com/questions/57701023/tkinter-
         e.widget.event_generate(f'<<{cmd}>>')
 
 
+class RightClicker_trans:
+    def __init__(self, e):
+        commands = ["Copy"]
+        menu = tk.Menu(None, tearoff=0, takefocus=0)
 
+        for txt in commands:
+            menu.add_command(label=txt, command=lambda e=e,txt=txt:self.click_command(e,txt))
+
+        menu.tk_popup(e.x_root + 40, e.y_root + 10, entry="0")
+
+    def click_command(self, e, cmd):
+        e.widget.event_generate(f'<<{cmd}>>')
 
 
 class NewWindow(tk.Frame):
