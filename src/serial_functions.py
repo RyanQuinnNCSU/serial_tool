@@ -8,6 +8,12 @@ import json
 
 config = {}
 
+# ascii_chart = {
+# 0: "<NULL>", 1:"<Start of Heading>", 2:"<Start of Text>", 3:"<End of Text>", 4:"<End of Trans>", 5:"<Enquiry>",6:"<Acknowledge>",7:"<Bell>",8:"<Backspace>",9:"<Horizontal Tab>",10:,11:,12:,13:,14:,15:,16:,17:,18:,19:,20:,
+# 21:,22:,23:,24:,25:,26:,27
+#
+# }
+
 def list_ports():
     try:
         port_name = {}
@@ -49,14 +55,30 @@ def list_ports():
         sys.exit(1)
 
 
+#█
 
 
 def hex_2_ascii(command):
     ascii_string=""
     if(len(command) >> 0):
-        ph = command.replace("0x", "")
-        clean_hex = ph.replace(" ", "")
-        ascii_string=bytearray.fromhex(clean_hex).decode()
+        still_parsing = True
+        index = 0
+        while still_parsing:
+            found = command[index:].find("0x")
+            print("Found = %d", found)
+            print(command[index:])
+            if found == -1:
+                still_parsing = False
+            else:
+                byte_value = int(command[index+found+2:index+found+5],16)
+                # if byte_value in ascii_chart.keys():
+                #     ascii_string = ascii_string + ascii_chart[byte_value]
+                if byte_value > 127:
+                    ascii_string = ascii_string + "<NA>"
+                else:
+                    print(command[index+found+2:index+found+5])
+                    ascii_string= ascii_string + bytearray.fromhex(command[index+found+2:index+found+5]).decode()
+                index = index+5
     else:
      ascii_string=""
     return ascii_string
