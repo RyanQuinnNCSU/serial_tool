@@ -24,6 +24,7 @@ transaction_window = []
 Listen_mode_send_b = []
 Listen_mode_command=[]
 interval = []
+ascii_mode = []
 #frames:
 top = []
 command = []
@@ -42,6 +43,7 @@ reason_4_start = 0 # 0=firstboot, 1=change_byte_format, 2=switch_profile
 
 
 
+
 def restart_frame(frame_flag):
     #Flags: top = 0, command = 1, trans = 3, trans2 = 4, options=5
     #clear global list
@@ -53,11 +55,11 @@ def restart_frame(frame_flag):
         canvas_command_list.clear()
         command[0].destroy()
         command.pop(0)
-        command.append(Commandframe(tk_tk[0]))
+        command.append(Commandframe(tk_tk[2]))
     if frame_flag == 5:
         options[0].destroy()
         options.pop(0)
-        options.append(Optionsframe(tk_tk[0]))
+        options.append(Optionsframe(tk_tk[2]))
 
 
 
@@ -83,6 +85,8 @@ class SampleApp(tk.Tk):
         trans2.append(Transactionframe2(lower_frame))
         options.append(Optionsframe(lower_frame))
         tk_tk.append(self)
+        tk_tk.append(upper_frame)
+        tk_tk.append(lower_frame)
     def switch_frame(self, frame_class):
         """Destroys current frame and replaces it with a new one."""
         new_frame = frame_class(self)
@@ -351,12 +355,16 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         global unsaved_profile
+        global ascii_mode
         #clear data from previous iterations
 
         remove_but_list*= 0
         entry_CN_list*= 0
         entry_byte_list*= 0
 
+        #disable changing of data format
+        print("ascii_mode_disable")
+        ascii_mode[0].config(state="disabled")
 
         popup = tk.Tk()
         popup.title("!")
@@ -375,7 +383,7 @@ class Commandframe(tk.Frame):
         # E1 = ttk.Entry(popup,textvariable=name_var)
         # E1.grid(column=1, row=2, sticky='WNES')
         # B1 = ttk.Button(popup, text="print",command=lambda : but.printcheck(E1.get()) ).grid(column=1, row=4, sticky='WNES')
-        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame,main_frame_canvas,main_canvas,frame_labels,main_vsb) ).grid(column=1, row=1, sticky='WNS')
+        apply_b = ttk.Button(popup, text="Apply", command =lambda :  self.store_entries(frame,main_frame_canvas,main_canvas,frame_labels,main_vsb) ).grid(column=1, row=1, sticky='WNS') #as a temp measure change function to validate_entries
 
         frame_canvas = tk.Frame(popup)
         frame_canvas.grid(row=2, column=1, pady=(5, 0), sticky='nw')
@@ -466,9 +474,15 @@ class Commandframe(tk.Frame):
 
         canvas.config(scrollregion=canvas.bbox("all"))
 
-
+        #popup.protocol("WM_DELETE_WINDOW", self.on_closing(popup))
         popup.mainloop()
 
+
+    def on_closing(self, popup):
+        global ascii_mode
+        print("on_close")
+        ascii_mode[0].config(state="normal")
+        popup.destroy()
     def update_command_entries(self,popup,frame_entries,frame_canvas,vsb,profile):
         global entry_CN_list
         global entry_byte_list
@@ -565,7 +579,7 @@ class Commandframe(tk.Frame):
         global label_byte_list
         global play_but_list
         global unsaved_profile
-        unsaved_profile['Num_Commands']= unsaved_profile['Num_Commands'] + 1
+
         # num_commands = unsaved_profile['Num_Commands']
         # remove_button = ttk.Button(frame_entries, text="-", command =lambda :  self.remove_command(popup,num_commands+1,add_button) )
         # remove_button.grid(column=1, row=num_commands+1, sticky='WNES')
@@ -586,12 +600,38 @@ class Commandframe(tk.Frame):
         Ey_ph = ttk.Entry(frame_entries,width=30)
         Ey_ph.bind("<Button-3>", RightClicker)
         entry_byte_list.append(Ey_ph)
+        temp_profile = unsaved_profile
         empty_command = { "name":"", "bytes": ""}
-        unsaved_profile['Commands'].append(empty_command)
-        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,unsaved_profile)
+        temp_profile['Num_Commands']= temp_profile['Num_Commands'] + 1
+        temp_profile['Commands'].append(empty_command)
+        self.snapshot_profile(temp_profile)
+        self.update_command_entries(popup,frame_entries,frame_canvas,vsb,temp_profile)
 
-
-
+    def snapshot_profile(self,profile):
+            global entry_CN_list
+            global entry_byte_list
+            global remove_but_list
+            global label_CN_list
+            global label_byte_list
+            global play_but_list
+            global unsaved_profile
+            global ascii_flag
+            print("snapshot_profile " + str(unsaved_profile['Num_Commands']) )
+            x=0
+            for entry in entry_CN_list:
+                profile['Commands'][x]['name'] = entry.get()
+                x+=1
+            y=0
+            for entry in entry_byte_list:
+                if ascii_flag == 1:
+                    profile['Commands'][y]['bytes'] = entry.get()
+                elif ascii_flag == 0:
+                    profile['Commands'][y]['bytes'] = SF.ascii_2_hex(entry.get())
+                elif ascii_flag == 2:
+                    profile['Commands'][y]['bytes'] = SF.dec_2_hex(entry.get())
+                #unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                y+=1
+            return profile
     def store_entries(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
             global entry_CN_list
             global entry_byte_list
@@ -602,43 +642,74 @@ class Commandframe(tk.Frame):
             global unsaved_profile
             global ascii_flag
             #print("Store Entries")
+            error_code = self.validate_entries(frame,main_frame_canvas,main_canvas,frame_labels,main_vsb)
+            if error_code == 0:
+                print("store_entries " + str(unsaved_profile['Num_Commands']) )
+                x=0
+                for entry in entry_CN_list:
+                    unsaved_profile['Commands'][x]['name'] = entry.get()
+                    x+=1
+                y=0
+                for entry in entry_byte_list:
+                    if ascii_flag == 1:
+                        unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                    elif ascii_flag == 0:
+                        unsaved_profile['Commands'][y]['bytes'] = SF.ascii_2_hex(entry.get())
+                    elif ascii_flag == 2:
+                        unsaved_profile['Commands'][y]['bytes'] = SF.dec_2_hex(entry.get())
+                    #unsaved_profile['Commands'][y]['bytes'] = entry.get()
+                    y+=1
+                #Update main window.
+                for x in range(0,len(play_but_list)):
+                    play_but_list[x].grid_forget()
+                    label_CN_list[x].grid_forget()
+                    label_byte_list[x].grid_forget()
+                play_but_list*= 0
+                label_CN_list*= 0
+                label_byte_list*= 0
+                self.update_command_list(frame,unsaved_profile,main_frame_canvas,main_canvas,frame_labels,main_vsb)
+
+    def validate_entries(self,frame,main_frame_canvas,main_canvas,frame_labels,main_vsb):
+            global entry_byte_list
+            global unsaved_profile
+            global ascii_flag
+            #print("Store Entries")
             print("store_entries " + str(unsaved_profile['Num_Commands']) )
-            x=0
-            for entry in entry_CN_list:
-                unsaved_profile['Commands'][x]['name'] = entry.get()
-                x+=1
-            y=0
+            valid_flag = 0
             for entry in entry_byte_list:
-                if ascii_flag == 1:
-                    unsaved_profile['Commands'][y]['bytes'] = entry.get()
-                elif ascii_flag == 0:
-                    unsaved_profile['Commands'][y]['bytes'] = SF.ascii_2_hex(entry.get())
-                elif ascii_flag == 2:
-                    unsaved_profile['Commands'][y]['bytes'] = SF.dec_2_hex(entry.get())
-                #unsaved_profile['Commands'][y]['bytes'] = entry.get()
-                y+=1
-            #Update main window.
-            for x in range(0,len(play_but_list)):
-                play_but_list[x].grid_forget()
-                label_CN_list[x].grid_forget()
-                label_byte_list[x].grid_forget()
-            play_but_list*= 0
-            label_CN_list*= 0
-            label_byte_list*= 0
-            self.update_command_list(frame,unsaved_profile,main_frame_canvas,main_canvas,frame_labels,main_vsb)
-            #print(unsaved_profile)
-    # def table(total_rows, total_columns,self,master,profile):
-    #     with open(profile, "r") as profile_file:
-    #         profile = json.loads(profile_file.read())
-    #         read_file.close()
-    #     for i in range(total_rows):
-    #         for j in range(total_columns):
-    #
-    #             self.e = Entry(master, width=20, fg='blue',
-    #                            font=('Arial',16,'bold'))
-    #
-    #             self.e.grid(row=i, column=j)
-    #             self.e.insert(END, lst[i][j])
+                valid_flag = SF.validate_command(entry.get(),ascii_flag)
+                if valid_flag != 0:
+                    self.format_error_window(entry.get())
+                    print("Command " + entry.get() + " is not in the correct format.")
+                    print("open pop up with text message")
+                    return 1
+            return 0
+    def format_error_window(self,command):
+            global ascii_flag
+            error_mess = tk.Tk()
+            error_mess.title("Wrong Format")
+            com_len = len(command)
+            command_text = ""
+            if com_len > 20:
+                command_text = command[:18] + "..."
+            else:
+                command_text = command
+            tk.Label(error_mess, text="Command \"" + command_text + "\" is not in the correct format.",anchor='w').grid(column=0, row=0, sticky='NEWS')
+            if ascii_flag == 1:
+                tk.Label(error_mess, text="Command bytes should be written in HEX.",anchor='w').grid(column=0, row=1, sticky='NEWS')
+                tk.Label(error_mess, text="Ex: \"0x01 0x02 0x03\"",anchor='w').grid(column=0, row=2, sticky='NEWS')
+                tk.Label(error_mess, text="Note that bytes can only contate values of 0x00 - 0xFF",anchor='w').grid(column=0, row=3, sticky='NEWS')
+            elif ascii_flag == 2:
+                tk.Label(error_mess, text="Command bytes should be written in DEC with a space between each byte.",anchor='w').grid(column=0, row=1, sticky='NEWS')
+                tk.Label(error_mess, text="Ex: \"1 124 255\"",anchor='w').grid(column=0, row=2, sticky='NEWS')
+                tk.Label(error_mess, text="Note that bytes can only contate values of 0 - 255",anchor='w').grid(column=0, row=3, sticky='NEWS')
+            w = 400
+            h = 100
+            ws = error_mess.winfo_screenwidth() # width of the screen
+            hs = error_mess.winfo_screenheight() # height of the screen
+            error_mess.geometry("%dx%d+%d+%d" % (w,h,ws-3*ws/4,hs-3*hs/4))
+
+
 class Transactionframe(tk.Frame):
 
     def __init__(self, master):
@@ -789,6 +860,7 @@ class Optionsframe(tk.Frame):
         ascii_drop = tk.OptionMenu(self,ascii_v, *ascii_array,command=self.change_ascii)
         ascii_drop.config(width=40, font=('Helvetica', 12))
         ascii_drop.grid(column=2, row=5, sticky='W')
+        ascii_mode.append(ascii_drop)
 
         space3 = tk.Label(self)
         space3.grid(column=1, row=6,sticky='WENS')
@@ -828,14 +900,7 @@ class Optionsframe(tk.Frame):
 
         #clear global list
         reason_4_start = 1
-        label_CN_list.clear()
-        label_byte_list.clear()
-        play_but_list.clear()
-        canvas_list.clear()
-        canvas_command_list.clear()
-        command[0].destroy()
-        command.pop(0)
-        command.append(Commandframe(tk_tk[0]))
+        restart_frame(1)
         #print("Test ascii dropdown")
 
 

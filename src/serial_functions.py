@@ -54,8 +54,46 @@ def list_ports():
         print(e)
         sys.exit(1)
 
+def validate_command(command,ascii_flag):
+    valid_flag = 0
+    hex_list = ["1","2","3","4",'5',"6","7","8","9", "0", "a","A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F"]
+    if(len(command) > 0):
+        still_parsing = True
+        index = 0
+        if ascii_flag == 1: #hex format expected
 
-#█
+            hex_command=command.replace(" ", "")
+            hex_size = len(hex_command)
+            #if size not devisible by 4, formate was broken
+            if hex_size % 4 != 0:
+                valid_flag = 1
+            else:
+                while still_parsing:
+                    # check format for 0xXX
+                    #print(hex_command[index] + hex_command[index+1] + hex_command[index+2] + hex_command[index+3])
+                    if hex_command[index] != "0" or hex_command[index+1] != "x" or hex_command[index+2] not in hex_list or hex_command[index+3] not in hex_list:
+                        valid_flag = 1
+                        still_parsing = False
+                    #check for end of string
+                    elif index+4 == hex_size:
+                        still_parsing = False
+                    # else increase index and keep parsing
+                    else:
+                        index= index + 4
+
+
+        elif ascii_flag == 2: #dec format expected
+            try:
+                dec_list=command.split()
+                for item in dec_list:
+                    num = int(item)
+                    if num > 255:
+                        valid_flag = 1
+            except:
+                valid_flag = 1
+
+
+    return valid_flag
 
 
 def hex_2_ascii(command):
@@ -65,8 +103,8 @@ def hex_2_ascii(command):
         index = 0
         while still_parsing:
             found = command[index:].find("0x")
-            print("Found = %d", found)
-            print(command[index:])
+            #print("Found = " + found)
+            #print(command[index:])
             if found == -1:
                 still_parsing = False
             else:
@@ -76,7 +114,7 @@ def hex_2_ascii(command):
                 if byte_value > 127:
                     ascii_string = ascii_string + "<NA>"
                 else:
-                    print(command[index+found+2:index+found+5])
+                    #print(command[index+found+2:index+found+5])
                     ascii_string= ascii_string + bytearray.fromhex(command[index+found+2:index+found+5]).decode()
                 index = index+5
     else:
