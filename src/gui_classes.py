@@ -474,7 +474,7 @@ class Commandframe(tk.Frame):
 
         canvas.config(scrollregion=canvas.bbox("all"))
 
-        #popup.protocol("WM_DELETE_WINDOW", self.on_closing(popup))
+        popup.protocol("WM_DELETE_WINDOW", lambda: self.on_closing(popup))
         popup.mainloop()
 
 
