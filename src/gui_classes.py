@@ -173,7 +173,9 @@ class Commandframe(tk.Frame):
                 trans_bytes = SF.hex_2_dec(bytes)
             transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
             transaction_window[2].update()
-            SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
+            error_string = SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
+            if len(error_string) > 0:
+                print("error has occured")
         else:
             command_n = unsaved_profile['Commands'][index]['name']
             #transaction_window[2].insert(tk.END,"********************************************" + "\r\n")

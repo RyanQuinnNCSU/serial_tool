@@ -189,59 +189,66 @@ def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
 
 
 def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag,listen_mode):
-    #remove '0x' from bytes
-    byte_s1 = bytes.replace("0x", "")
-    #remove ' ' from bytes
-    byte_s2 = byte_s1.replace(" ", "")
-    print("Byte check = " + byte_s2)
-    byte_2_send =  bytearray.fromhex(byte_s2)
-    print("Bytes to send: " + str(byte_2_send))
-    print("Com Port: " + com_port)
-    print("Baudrate: " + str(baudrate))
-    #transaction_window.insert(tk.END,"TX: " + str(bytes) + "\r\n")
-    ser = serial.Serial(com_port, baudrate, timeout=timeout)
-    print("Serial Open")
-    print("Transmitted gecko_cmd_system_get_bt_address")
-    ser.write(byte_2_send)
-    response = ser.read(500)
-    # response_decode = response.decode("hex")
-    ser.close()
-    print("Serial Closed")
-    print("Serial Response = " + str(response))
-    #print("Serial Decoded Response = " + str(response.decode("utf-8")) )
-    response_s = str(response)
-    response_redo = response.hex()
-    final_rsp_string = "0x" + response_redo[0:2]
-    redo_len = len(response_redo)//2
+    error_string = ""
+    try:
+        #remove '0x' from bytes
+        byte_s1 = bytes.replace("0x", "")
+        #remove ' ' from bytes
+        byte_s2 = byte_s1.replace(" ", "")
+        print("Byte check = " + byte_s2)
+        byte_2_send =  bytearray.fromhex(byte_s2)
+        print("Bytes to send: " + str(byte_2_send))
+        print("Com Port: " + com_port)
+        print("Baudrate: " + str(baudrate))
+        #transaction_window.insert(tk.END,"TX: " + str(bytes) + "\r\n")
+        ser = serial.Serial(com_port, baudrate, timeout=timeout)
+        print("Serial Open")
+        print("Transmitted gecko_cmd_system_get_bt_address")
+        ser.write(byte_2_send)
+        response = ser.read(500)
+        # response_decode = response.decode("hex")
+        ser.close()
+        print("Serial Closed")
+        print("Serial Response = " + str(response))
+        #print("Serial Decoded Response = " + str(response.decode("utf-8")) )
+        response_s = str(response)
+        response_redo = response.hex()
+        final_rsp_string = "0x" + response_redo[0:2]
+        redo_len = len(response_redo)//2
 
-    for x in range(1,redo_len):
-        start = x*2
-        end = x*2 + 2
-        final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
-    print("response redo = " + final_rsp_string)
-    #first_qm = response_s.find('\'')
-    if len(response_redo) <= 2:  #(first_qm == -1):
-        if listen_mode ==  False:
-            transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
-            transaction_window.insert(tk.END,"********************************************" + "\r\n")
-    else:
-        # second_gm = response_s.find('\'',first_qm +1)
-        # unquoted_s = response_s[first_qm+1:second_gm]
-        # replace_slash_s = unquoted_s.replace('\\','0')
-        # add_spaces_s = replace_slash_s.replace('0x',' 0x')
-        # final_rsp_string = add_spaces_s[1:]
-        if ascii_flag == 1:
-            rsp_bytes = final_rsp_string
-        elif ascii_flag == 0:
-            rsp_bytes = hex_2_ascii(final_rsp_string)
-        elif ascii_flag == 2:
-            rsp_bytes = hex_2_dec(final_rsp_string)
-        if listen_mode ==  False:
-            transaction_window.insert(tk.END,"RX: " + str(rsp_bytes) + "\r\n")
-            transaction_window.insert(tk.END,"********************************************" + "\r\n")
+        for x in range(1,redo_len):
+            start = x*2
+            end = x*2 + 2
+            final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
+        print("response redo = " + final_rsp_string)
+        #first_qm = response_s.find('\'')
+        if len(response_redo) <= 2:  #(first_qm == -1):
+            if listen_mode ==  False:
+                transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
+                transaction_window.insert(tk.END,"********************************************" + "\r\n")
         else:
-            transaction_window.insert(tk.END,str(rsp_bytes))
-
+            # second_gm = response_s.find('\'',first_qm +1)
+            # unquoted_s = response_s[first_qm+1:second_gm]
+            # replace_slash_s = unquoted_s.replace('\\','0')
+            # add_spaces_s = replace_slash_s.replace('0x',' 0x')
+            # final_rsp_string = add_spaces_s[1:]
+            if ascii_flag == 1:
+                rsp_bytes = final_rsp_string
+            elif ascii_flag == 0:
+                rsp_bytes = hex_2_ascii(final_rsp_string)
+            elif ascii_flag == 2:
+                rsp_bytes = hex_2_dec(final_rsp_string)
+            if listen_mode ==  False:
+                transaction_window.insert(tk.END,"RX: " + str(rsp_bytes) + "\r\n")
+                transaction_window.insert(tk.END,"********************************************" + "\r\n")
+            else:
+                transaction_window.insert(tk.END,str(rsp_bytes))
+    except Exception as e:
+        if type(Exception) is type(serial.SerialException):
+            print("Serial exception has occured")
+        print(e)
+        error_string = str(e)
+    return error_string
 
 if __name__ == "__main__":
     list_ports()
