@@ -159,6 +159,7 @@ def dec_2_hex(command):
 
 
 def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
+    error_string = ""
     try:
         ser = serial.Serial(com_port, baudrate, timeout=timeout)
         #print("Serial Open")

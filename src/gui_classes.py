@@ -984,7 +984,7 @@ class Topframe(tk.Frame):
         top_widgets_list.append(save_b)
 
         #New profile with current settings
-        new_b = tk.Button(self, text="Save As", command=lambda : self.new_profile() )
+        new_b = tk.Button(self, text="Save As New Profile", command=lambda : self.new_profile() )
         new_b.grid(column=1, row=2, sticky='W')
         top_widgets_list.append(new_b)
 
