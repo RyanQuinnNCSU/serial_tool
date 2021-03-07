@@ -42,6 +42,36 @@ reason_4_start = 0 # 0=firstboot, 1=change_byte_format, 2=switch_profile
 
 
 
+def serial_error_message(error):
+    serial_error_mess = tk.Tk()
+    serial_error_mess.title("Serial Error")
+
+    label_1 = tk.Label(serial_error_mess, text="A serial failure has occured. Please refresh the serial device list and select an active COM port.",font=(None, 11),anchor='w')
+    label_1.grid(column=0, row=1, sticky='NEWS')
+    serial_error_mess.update_idletasks()
+    #w = 650
+    w = label_1.winfo_width()
+    print("width of row 1 = "+ str(w))
+    #tk.Label(serial_error_mess, text="Error details:",anchor='w').grid(column=0, row=2, sticky='NEWS')
+    label_2 = tk.Label(serial_error_mess, text="ERROR: "+error,bg ='white',fg = 'black', anchor='w',wraplength=w,justify='left')
+    label_2.grid(column=0, row=3, sticky='NEWS')
+
+
+    serial_error_mess.update_idletasks()
+    h = label_1.winfo_height() + label_2.winfo_height()
+    #h = 100
+    #serial_error_mess.update_idletasks()
+    serial_error_mess.protocol("WM_DELETE_WINDOW", lambda: mode_check(serial_error_mess))
+    ws = serial_error_mess.winfo_screenwidth() # width of the screen
+    hs = serial_error_mess.winfo_screenheight() # height of the screen
+    serial_error_mess.geometry("%dx%d+%d+%d" % (w,h,ws-3*ws/4,hs-3*hs/4))
+
+def mode_check(window):
+    global listen_mode
+    if listen_mode == True:
+        listen = False
+    window.destroy()
+
 
 
 def restart_frame(frame_flag):
@@ -175,13 +205,15 @@ class Commandframe(tk.Frame):
             transaction_window[2].update()
             error_string = SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
             if len(error_string) > 0:
-                print("error has occured")
+                serial_error_message(error_string)
+                transaction_window[2].insert(tk.END, "\r\n"  + "Serial Communicaiton Failed" + "\r\n")
         else:
             command_n = unsaved_profile['Commands'][index]['name']
             #transaction_window[2].insert(tk.END,"********************************************" + "\r\n")
             transaction_window[2].insert(tk.END, "\r\n"  + "Command: " + command_n + "\r\n")
             Listen_mode_command.clear()
             Listen_mode_command.append(unsaved_profile['Commands'][index]['bytes'])
+
     def update_ascii_commands(self, profile):
         global ascii_command_list
         ascii_command_list = profile['Commands']
@@ -485,6 +517,7 @@ class Commandframe(tk.Frame):
         print("on_close")
         ascii_mode[0].config(state="normal")
         popup.destroy()
+
     def update_command_entries(self,popup,frame_entries,frame_canvas,vsb,profile):
         global entry_CN_list
         global entry_byte_list
@@ -1113,11 +1146,17 @@ class Topframe(tk.Frame):
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
         timeout = 1 #may not need.
+        error_check = 0
         #if in listen mode and serial line isn't begin used read serial
         while listen_mode:
-
             if len(Listen_mode_command) == 0:
-                SF.listener(com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+                error_string = SF.listener(com_port,baudrate,transaction_window[2],timeout,ascii_flag)
+                if len(error_string) > 0:
+                    transaction_window[2].insert(tk.END, "\r\n"  + "Serial Communicaiton Failed" + "\r\n")
+                    transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
+                    #serial_error_message(error_string)
+                    listen_mode = False
+                    self.start_stop_serial_thread()
             else:
                 trans_bytes = ""
                 if ascii_flag == 1:
@@ -1128,10 +1167,15 @@ class Topframe(tk.Frame):
                     trans_bytes = SF.hex_2_dec(Listen_mode_command[0])
                 transaction_window[2].insert(tk.END,"\r\nTX: " + trans_bytes + "\r\n")
                 transaction_window[2].update()
-                SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
+                error_string = SF.send_serial(Listen_mode_command[0],com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
                 Listen_mode_command.clear()
-        #Possibly loop though the gui with this
-
+                if len(error_string) > 0:
+                    transaction_window[2].insert(tk.END, "\r\n"  + "Serial Communicaiton Failed" + "\r\n")
+                    transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
+                    #serial_error_message(error_string)
+                    listen_mode = False
+                    self.start_stop_serial_thread()
+                    
     def loop_through_serial_commands(self): #sending all serial commands.
         global unsaved_profile
         global interval
@@ -1156,7 +1200,12 @@ class Topframe(tk.Frame):
                     trans_bytes = SF.hex_2_dec(command['bytes'])
                 transaction_window[2].insert(tk.END,"TX: " + trans_bytes + "\r\n")
                 transaction_window[2].update()
-                SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
+                error_string = SF.send_serial(bytes,com_port,baudrate,transaction_window[2],timeout,ascii_flag,listen_mode)
+                if len(error_string) > 0:
+                    #transaction_window[2].insert(tk.END, "\r\n"  + "Serial Communicaiton Failed" + "\r\n")
+                    #transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
+                    serial_error_message(error_string)
+                    break
             print("End of commmand loop.")
 
 class RightClicker: #from: https://stackoverflow.com/questions/57701023/tkinter-notepad-program-trying-to-make-a-right-click-copy-paste-option-really-ne

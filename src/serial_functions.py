@@ -159,35 +159,40 @@ def dec_2_hex(command):
 
 
 def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
-    ser = serial.Serial(com_port, baudrate, timeout=timeout)
-    #print("Serial Open")
+    try:
+        ser = serial.Serial(com_port, baudrate, timeout=timeout)
+        #print("Serial Open")
 
-    response = ser.read(500)
-    #print(len(response))
-    # response_decode = response.decode("hex")
-    ser.close()
-    if len(response) > 0:
-        print("Serial Response = " + str(response))
-        response_s = str(response)
-        response_redo = response.hex()
-        final_rsp_string = "0x" + response_redo[0:2]
-        redo_len = len(response_redo)//2
+        response = ser.read(500)
+        #print(len(response))
+        # response_decode = response.decode("hex")
+        ser.close()
+        if len(response) > 0:
+            print("Serial Response = " + str(response))
+            response_s = str(response)
+            response_redo = response.hex()
+            final_rsp_string = "0x" + response_redo[0:2]
+            redo_len = len(response_redo)//2
 
-        for x in range(1,redo_len):
-            start = x*2
-            end = x*2 + 2
-            final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
-        final_rsp_string = final_rsp_string
-        #print("response redo = " + final_rsp_string)
-        if ascii_flag == 1:
-            rsp_bytes = final_rsp_string  + " "
-        elif ascii_flag == 0:
-            rsp_bytes = hex_2_ascii(final_rsp_string)  + " "
-        elif ascii_flag == 2:
-            rsp_bytes = hex_2_dec(final_rsp_string)
-        transaction_window.insert(tk.END,str(rsp_bytes))
-
-
+            for x in range(1,redo_len):
+                start = x*2
+                end = x*2 + 2
+                final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
+            final_rsp_string = final_rsp_string
+            #print("response redo = " + final_rsp_string)
+            if ascii_flag == 1:
+                rsp_bytes = final_rsp_string  + " "
+            elif ascii_flag == 0:
+                rsp_bytes = hex_2_ascii(final_rsp_string)  + " "
+            elif ascii_flag == 2:
+                rsp_bytes = hex_2_dec(final_rsp_string)
+            transaction_window.insert(tk.END,str(rsp_bytes))
+    except Exception as e:
+        if type(Exception) is type(serial.SerialException):
+            print("Serial exception has occured")
+        print(e)
+        error_string = str(e)
+    return error_string
 def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag,listen_mode):
     error_string = ""
     try:
