@@ -283,7 +283,7 @@ class Commandframe(tk.Frame):
                         final_name_string = unsaved_profile['Commands'][x]['name'][0:29] + " ..."
                     else:
                         final_name_string = unsaved_profile['Commands'][x]['name']
-                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
+                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1,width=33, relief="solid", bg="white",anchor="w")
                     CN.grid(column=2, row=x+3, sticky='WNES')
                     label_CN_list.append(CN)
                 bytes_s=""
@@ -296,21 +296,21 @@ class Commandframe(tk.Frame):
                     elif ascii_flag == 2:
                         bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][y]['bytes'])
                     byte_lenght = len(bytes_s)
-                    if byte_lenght > 30:
-                        final_byte_string = bytes_s[0:29] + " ..."
+                    if byte_lenght > 55:
+                        final_byte_string = bytes_s[0:54] + " ..."
                     else:
                         final_byte_string = bytes_s
-                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
+                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1,width=55, relief="solid",bg="white",anchor="w")
                     CB.grid(column=3, row=y+3, sticky='WNES')
                     label_byte_list.append(CB)
                     bytes_s=""
                 frame_labels.update_idletasks()
 
                 columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
-                if(num_commands <= 15):
+                if(num_commands <= 28):
                     rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
                 else:
-                    rows_height = label_byte_list[0].winfo_height() * 16
+                    rows_height = label_byte_list[0].winfo_height() * 29
                 print("list_commands columns_width" + str(columns_width))
                 print("list_commands rows_height " + str(rows_height))
                 frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
@@ -342,7 +342,7 @@ class Commandframe(tk.Frame):
                 final_name_string = profile['Commands'][x]['name'][0:29] + " ..."
             else:
                 final_name_string = profile['Commands'][x]['name']
-            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1, relief="solid", bg="white",anchor="w")
+            CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1,width=33, relief="solid", bg="white",anchor="w")
             print("command name " + str(profile['Commands'][x]['name']))
             CN.grid(column=2, row=x+3, sticky='WNES')
             label_CN_list.append(CN)
@@ -357,11 +357,11 @@ class Commandframe(tk.Frame):
                 bytes_s = SF.hex_2_dec(profile['Commands'][y]['bytes'])
             print("byte string" + bytes_s)
             byte_lenght = len(bytes_s)
-            if byte_lenght > 30:
-                final_byte_string = bytes_s[0:29] + " ..."
+            if byte_lenght > 55:
+                final_byte_string = bytes_s[0:54] + " ..."
             else:
                 final_byte_string = bytes_s
-            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, relief="solid",bg="white",anchor="w")
+            CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1, width=55, relief="solid",bg="white",anchor="w")
             CB.grid(column=3, row=y+3, sticky='WNES')
             label_byte_list.append(CB)
             bytes_s=""
@@ -369,10 +369,10 @@ class Commandframe(tk.Frame):
         frame_labels.update_idletasks()
 
         columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
-        if(num_commands <= 15):
+        if(num_commands <= 28):
             rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
         else:
-            rows_height = label_byte_list[0].winfo_height() * 16
+            rows_height = label_byte_list[0].winfo_height() * 29
         window_height = remove_but_list[0].winfo_height() * (num_commands)
         print("update_command_list columns_width" + str(columns_width))
         print("update_command_list rows_height" + str(rows_height))
@@ -776,7 +776,7 @@ class Transactionframe(tk.Frame):
         vsb.grid(row=0, column=1, sticky='ns')
         #canvas.configure(yscrollcommand=vsb.set)
 
-        text_w = tk.Text(frame_text)
+        text_w = tk.Text(frame_text,height=50)
         text_w.bind("<Button-3>", RightClicker_trans)
         text_w.grid(column=1, row=1, sticky='NSEW')
         text_w.configure(yscrollcommand=vsb.set)
@@ -1175,7 +1175,7 @@ class Topframe(tk.Frame):
                     #serial_error_message(error_string)
                     listen_mode = False
                     self.start_stop_serial_thread()
-                    
+
     def loop_through_serial_commands(self): #sending all serial commands.
         global unsaved_profile
         global interval
