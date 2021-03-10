@@ -48,6 +48,7 @@ def list_ports():
         with open("../json/config.json", "w") as write_file:
             json.dump(config, write_file)
             write_file.close()
+
         return port_name
 
     except Exception as e:
@@ -179,15 +180,17 @@ def listener(com_port,baudrate,transaction_window,timeout,ascii_flag):
                 start = x*2
                 end = x*2 + 2
                 final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
-            final_rsp_string = final_rsp_string
+
             #print("response redo = " + final_rsp_string)
             if ascii_flag == 1:
                 rsp_bytes = final_rsp_string  + " "
             elif ascii_flag == 0:
-                rsp_bytes = hex_2_ascii(final_rsp_string)  + " "
+                #rsp_bytes = hex_2_ascii(final_rsp_string)  + " "
+                rsp_bytes = response_s[2:-1]
             elif ascii_flag == 2:
                 rsp_bytes = hex_2_dec(final_rsp_string)
-            transaction_window.insert(tk.END,str(rsp_bytes))
+            #print("Final Response Check = " + response_s[2:-1] )
+            transaction_window.insert(tk.END,rsp_bytes)
     except Exception as e:
         if type(Exception) is type(serial.SerialException):
             print("Serial exception has occured")
@@ -241,7 +244,8 @@ def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag,li
             if ascii_flag == 1:
                 rsp_bytes = final_rsp_string
             elif ascii_flag == 0:
-                rsp_bytes = hex_2_ascii(final_rsp_string)
+                #rsp_bytes = hex_2_ascii(final_rsp_string)
+                rsp_bytes = response_s[2:-1]
             elif ascii_flag == 2:
                 rsp_bytes = hex_2_dec(final_rsp_string)
             if listen_mode ==  False:

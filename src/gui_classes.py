@@ -226,6 +226,7 @@ class Commandframe(tk.Frame):
             ascii_command_list[x]['bytes'] = SF.hex_2_ascii(ascii_command_list[x]['bytes'])
             bytes = ascii_command_list[x]['bytes']
             print(bytes)
+
     def list_commands(self,frame,frame_canvas,canvas,frame_labels,vsb):
             global entry_CN_list
             global entry_byte_list
@@ -246,75 +247,75 @@ class Commandframe(tk.Frame):
             #print command table
             tk.Label(frame_labels, text="Command Names").grid(column=2, row=2, sticky='WN')
             tk.Label(frame_labels, text="Byte String").grid(column=3, row=2, sticky='WN')
-            if config['Profile'] == "../json/default.json":
-                #make empty Table
-                for x in range(0, 8):
-                    tk.Button(frame, text=">>").grid(column=1, row=x+3, sticky='WNES')
-                    tk.Label(frame, text="       ",borderwidth=1, relief="solid", bg="white").grid(column=2, row=x+3, sticky='WNES')
-                    tk.Label(frame, text="       ",borderwidth=1, relief="solid",bg="white").grid(column=3, row=x+3, sticky='WNES')
-            else:
-                with open(config['Profile'], "r") as read_file:
-                    profile = json.loads(read_file.read())
-                    read_file.close()
-                if reason_4_start == 0 or reason_4_start == 2 :
-                     unsaved_profile = profile
+
+            if not os.path.isfile(config['Profile']):#if profile listed in config file is not a file set profile to default.
+                config['Profile'] = "../json/default.json"
+                with open("../json/config.json", "w") as write_file:
+                    json.dump(config,write_file)
+                    write_file.close()
+
+            with open(config['Profile'], "r") as read_file:
+                profile = json.loads(read_file.read())
+                read_file.close()
+            if reason_4_start == 0 or reason_4_start == 2 :
+                 unsaved_profile = profile
 
 
-                if unsaved_profile['Byte Format'] == "ASCII":
-                    ascii_flag = 0
-                elif unsaved_profile['Byte Format'] == "HEX":
-                    ascii_flag = 1
-                elif unsaved_profile['Byte Format'] == "DEC":
-                    ascii_flag = 2
-                #self.update_ascii_commands(unsaved_profile)
-                num_commands = len(unsaved_profile['Commands'])
-                print("Number of Commands " + str(num_commands) )
+            if unsaved_profile['Byte Format'] == "ASCII":
+                ascii_flag = 0
+            elif unsaved_profile['Byte Format'] == "HEX":
+                ascii_flag = 1
+            elif unsaved_profile['Byte Format'] == "DEC":
+                ascii_flag = 2
+            #self.update_ascii_commands(unsaved_profile)
+            num_commands = len(unsaved_profile['Commands'])
+            print("Number of Commands " + str(num_commands) )
 
-                vsb.grid(row=0, column=1, sticky='ns')
-                #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
-                #vsb2.grid(row=num_commands, column=0, sticky='ew')
-                canvas.configure(yscrollcommand=vsb.set)
-                for x in range(0,num_commands):
-                    B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
-                    B_P.grid(column=1, row=x+3, sticky='WNES')
-                    play_but_list.append(B_P)
-                    name_lenght = len(unsaved_profile['Commands'][x]['name'])
-                    if name_lenght > 30:
-                        final_name_string = unsaved_profile['Commands'][x]['name'][0:29] + " ..."
-                    else:
-                        final_name_string = unsaved_profile['Commands'][x]['name']
-                    CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1,width=33, relief="solid", bg="white",anchor="w")
-                    CN.grid(column=2, row=x+3, sticky='WNES')
-                    label_CN_list.append(CN)
-                bytes_s=""
-                for y in range(0,num_commands):
-                    print("ascii_flag = ", ascii_flag)
-                    if ascii_flag == 1:
-                        bytes_s = unsaved_profile['Commands'][y]['bytes']
-                    elif ascii_flag == 0:
-                        bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][y]['bytes'])
-                    elif ascii_flag == 2:
-                        bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][y]['bytes'])
-                    byte_lenght = len(bytes_s)
-                    if byte_lenght > 55:
-                        final_byte_string = bytes_s[0:54] + " ..."
-                    else:
-                        final_byte_string = bytes_s
-                    CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1,width=55, relief="solid",bg="white",anchor="w")
-                    CB.grid(column=3, row=y+3, sticky='WNES')
-                    label_byte_list.append(CB)
-                    bytes_s=""
-                frame_labels.update_idletasks()
-
-                columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
-                if(num_commands <= 28):
-                    rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
+            vsb.grid(row=0, column=1, sticky='ns')
+            #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+            #vsb2.grid(row=num_commands, column=0, sticky='ew')
+            canvas.configure(yscrollcommand=vsb.set)
+            for x in range(0,num_commands):
+                B_P = tk.Button(frame_labels, text=">>",command=lambda x=x: self.send_serial_command(x))
+                B_P.grid(column=1, row=x+3, sticky='WNES')
+                play_but_list.append(B_P)
+                name_lenght = len(unsaved_profile['Commands'][x]['name'])
+                if name_lenght > 30:
+                    final_name_string = unsaved_profile['Commands'][x]['name'][0:29] + " ..."
                 else:
-                    rows_height = label_byte_list[0].winfo_height() * 29
-                print("list_commands columns_width" + str(columns_width))
-                print("list_commands rows_height " + str(rows_height))
-                frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
-                canvas.config(scrollregion=canvas.bbox("all"))
+                    final_name_string = unsaved_profile['Commands'][x]['name']
+                CN = tk.Label(frame_labels, text=final_name_string,borderwidth=1,width=33, relief="solid", bg="white",anchor="w")
+                CN.grid(column=2, row=x+3, sticky='WNES')
+                label_CN_list.append(CN)
+            bytes_s=""
+            for y in range(0,num_commands):
+                print("ascii_flag = ", ascii_flag)
+                if ascii_flag == 1:
+                    bytes_s = unsaved_profile['Commands'][y]['bytes']
+                elif ascii_flag == 0:
+                    bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][y]['bytes'])
+                elif ascii_flag == 2:
+                    bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][y]['bytes'])
+                byte_lenght = len(bytes_s)
+                if byte_lenght > 55:
+                    final_byte_string = bytes_s[0:54] + " ..."
+                else:
+                    final_byte_string = bytes_s
+                CB = tk.Label(frame_labels, text=final_byte_string,borderwidth=1,width=55, relief="solid",bg="white",anchor="w")
+                CB.grid(column=3, row=y+3, sticky='WNES')
+                label_byte_list.append(CB)
+                bytes_s=""
+            frame_labels.update_idletasks()
+
+            columns_width = label_byte_list[0].winfo_width() + play_but_list[0].winfo_width() + label_CN_list[0].winfo_width()
+            if(num_commands <= 28):
+                rows_height = label_byte_list[0].winfo_height() * (num_commands+1)
+            else:
+                rows_height = label_byte_list[0].winfo_height() * 29
+            print("list_commands columns_width" + str(columns_width))
+            print("list_commands rows_height " + str(rows_height))
+            frame_canvas.config(width=columns_width + vsb.winfo_width(),height=rows_height)
+            canvas.config(scrollregion=canvas.bbox("all"))
 
     def update_command_list(self,frame,profile,main_frame_canvas,main_canvas,frame_labels,vsb):
         global entry_CN_list
@@ -1023,6 +1024,7 @@ class Topframe(tk.Frame):
         top_widgets_list.append(profile_label)
         top_widgets_list.append(my_profile_var)
 
+
         #label for listen mode
         listen_var = tk.StringVar()
         listen_var.set("                     ")
@@ -1142,6 +1144,7 @@ class Topframe(tk.Frame):
         global transaction_window
         global ascii_flag
         global Listen_mode_command
+        global top_widgets_list
         timeout = unsaved_profile['Interval']
         com_port = unsaved_profile['Com Port']
         baudrate = unsaved_profile['Baudrate']
@@ -1156,7 +1159,8 @@ class Topframe(tk.Frame):
                     transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
                     #serial_error_message(error_string)
                     listen_mode = False
-                    self.start_stop_serial_thread()
+                    top_widgets_list[10].set("                     ")
+
             else:
                 trans_bytes = ""
                 if ascii_flag == 1:
@@ -1174,7 +1178,7 @@ class Topframe(tk.Frame):
                     transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
                     #serial_error_message(error_string)
                     listen_mode = False
-                    self.start_stop_serial_thread()
+                    top_widgets_list[10].set("                     ")
 
     def loop_through_serial_commands(self): #sending all serial commands.
         global unsaved_profile
