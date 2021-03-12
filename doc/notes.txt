@@ -24,3 +24,7 @@ No need to delete old widget.
 
 
 https://stackoverflow.com/questions/34276663/tkinter-gui-layout-using-frames-and-grid
+
+
+creating exe C:\Users\rquin\AppData\Local\Programs\Python\Python38\Scripts\pyinstaller --onefile main.py
+Better exe cmd: C:\Users\rquin\AppData\Local\Programs\Python\Python38\Scripts\pyinstaller --onefile --windowed --icon=Images/Bugger.ico src/main.py

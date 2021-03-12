@@ -45,7 +45,8 @@ reason_4_start = 0 # 0=firstboot, 1=change_byte_format, 2=switch_profile
 def serial_error_message(error):
     serial_error_mess = tk.Tk()
     serial_error_mess.title("Serial Error")
-
+    if os.path.isfile("../Images/Bugger.ico"):
+        serial_error_mess.iconbitmap("../Images/Bugger.ico")
     label_1 = tk.Label(serial_error_mess, text="A serial failure has occured. Please refresh the serial device list and select an active COM port.",font=(None, 11),anchor='w')
     label_1.grid(column=0, row=1, sticky='NEWS')
     serial_error_mess.update_idletasks()
@@ -403,6 +404,8 @@ class Commandframe(tk.Frame):
 
         popup = tk.Tk()
         popup.title("!")
+        if os.path.isfile("../Images/Bugger.ico"):
+            popup.iconbitmap("../Images/Bugger.ico")
         profile = {}
         num_commands=0
         w = 800

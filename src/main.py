@@ -54,6 +54,8 @@ try:
                     jp_file.close()
         SF.list_ports()
         app = GUI.SampleApp()
+        if os.path.isfile("../Images/Bugger.ico"):
+            app.iconbitmap("../Images/Bugger.ico")
         app.mainloop()
 except Exception as e:
     print(e)
