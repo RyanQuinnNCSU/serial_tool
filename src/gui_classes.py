@@ -444,60 +444,56 @@ class Commandframe(tk.Frame):
             config_p = json.loads(read_file.read())
             read_file.close()
         #print command table
-        if config_p['Profile'] == "../json/default.json":
-            #make empty Table
-            for x in range(0, 8):
-                print(PH)
-        else:
-            if not bool(unsaved_profile):
-                with open(config_p['Profile'], "r") as read_file:
-                    profile = json.loads(read_file.read())
-                    unsaved_profile=profile.copy()
-                    #print("num commands = %d",unsaved_profile['Num_Commands'])
-                    read_file.close()
-                num_commands = len(profile['Commands'])
-            else:
-                num_commands = len(unsaved_profile['Commands'])
 
-            # Link a scrollbar to the canvas
-            vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
-            vsb.grid(row=0, column=1, sticky='ns')
-            #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
-            #vsb2.grid(row=num_commands, column=0, sticky='ew')
-            canvas.configure(yscrollcommand=vsb.set)
-            add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
-            add_button.grid(column=1, row=3, sticky='WNES')
-            for w in range (0,num_commands):
-                remove_button_ph = ttk.Button(frame_entries)
-                remove_but_list.append(remove_button_ph)
-                Ex_ph = ttk.Entry(frame_entries,width=30)
-                Ex_ph.bind("<Button-3>", RightClicker)
-                entry_CN_list.append(Ex_ph)
-                Ey_ph = ttk.Entry(frame_entries,width=80)
-                Ey_ph.bind("<Button-3>", RightClicker)
-                entry_byte_list.append(Ey_ph)
-            for x in range(0,num_commands):
-                index = x
-                remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
-                remove_button.grid(column=1, row=x, sticky='WNES')
-                remove_but_list[x] = remove_button
-                Ex = ttk.Entry(frame_entries,width=30)
-                Ex.bind("<Button-3>", RightClicker)
-                Ex.insert(0, unsaved_profile['Commands'][x]['name'])
-                Ex.grid(column=2, row=x, sticky='WNES')
-                entry_CN_list[x] = Ex
-                #bytes_s = unsaved_profile['Commands'][x]['bytes']
-                if ascii_flag == 1:
-                    bytes_s = unsaved_profile['Commands'][x]['bytes']
-                elif ascii_flag == 0:
-                    bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
-                elif ascii_flag == 2:
-                    bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
-                Ey = ttk.Entry(frame_entries,width=80)
-                Ey.bind("<Button-3>", RightClicker)
-                Ey.insert(0, bytes_s)
-                Ey.grid(column=3, row=x, sticky='WNES')
-                entry_byte_list[x] = Ey
+        if not bool(unsaved_profile):
+            with open(config_p['Profile'], "r") as read_file:
+                profile = json.loads(read_file.read())
+                unsaved_profile=profile.copy()
+                #print("num commands = %d",unsaved_profile['Num_Commands'])
+                read_file.close()
+            num_commands = len(profile['Commands'])
+        else:
+            num_commands = len(unsaved_profile['Commands'])
+
+        # Link a scrollbar to the canvas
+        vsb = tk.Scrollbar(frame_canvas, orient="vertical", command=canvas.yview)
+        vsb.grid(row=0, column=1, sticky='ns')
+        #vsb2 = tk.Scrollbar(frame_canvas, orient="horizontal", command=canvas.xview)
+        #vsb2.grid(row=num_commands, column=0, sticky='ew')
+        canvas.configure(yscrollcommand=vsb.set)
+        add_button = ttk.Button(popup, text="+", command =lambda : self.add_command(popup,frame_entries,frame_canvas,vsb))
+        add_button.grid(column=1, row=3, sticky='WNES')
+        for w in range (0,num_commands):
+            remove_button_ph = ttk.Button(frame_entries)
+            remove_but_list.append(remove_button_ph)
+            Ex_ph = ttk.Entry(frame_entries,width=30)
+            Ex_ph.bind("<Button-3>", RightClicker)
+            entry_CN_list.append(Ex_ph)
+            Ey_ph = ttk.Entry(frame_entries,width=80)
+            Ey_ph.bind("<Button-3>", RightClicker)
+            entry_byte_list.append(Ey_ph)
+        for x in range(0,num_commands):
+            index = x
+            remove_button = ttk.Button(frame_entries, text="-", command =lambda index=index:  self.remove_command(popup,frame_entries,frame_canvas,index,vsb) )
+            remove_button.grid(column=1, row=x, sticky='WNES')
+            remove_but_list[x] = remove_button
+            Ex = ttk.Entry(frame_entries,width=30)
+            Ex.bind("<Button-3>", RightClicker)
+            Ex.insert(0, unsaved_profile['Commands'][x]['name'])
+            Ex.grid(column=2, row=x, sticky='WNES')
+            entry_CN_list[x] = Ex
+            #bytes_s = unsaved_profile['Commands'][x]['bytes']
+            if ascii_flag == 1:
+                bytes_s = unsaved_profile['Commands'][x]['bytes']
+            elif ascii_flag == 0:
+                bytes_s = SF.hex_2_ascii(unsaved_profile['Commands'][x]['bytes'])
+            elif ascii_flag == 2:
+                bytes_s = SF.hex_2_dec(unsaved_profile['Commands'][x]['bytes'])
+            Ey = ttk.Entry(frame_entries,width=80)
+            Ey.bind("<Button-3>", RightClicker)
+            Ey.insert(0, bytes_s)
+            Ey.grid(column=3, row=x, sticky='WNES')
+            entry_byte_list[x] = Ey
         frame_entries.update_idletasks()
 
         columns_width = remove_but_list[0].winfo_width() + entry_CN_list[0].winfo_width() +  entry_byte_list[0].winfo_width()
@@ -1017,13 +1013,18 @@ class Topframe(tk.Frame):
         switch_p.grid(column=2, row=2, sticky='W')
         top_widgets_list.append(switch_p)
 
+        #Switch Profile
+        switch_p = tk.Button(self, text='Info', command=lambda : self.about())
+        switch_p.grid(column=7, row=2, sticky='W')
+        top_widgets_list.append(switch_p)
+
         #print profile in use in label
         profile_name =  self.get_profile_name()
         profile_label_text = "|| Active Profile: " + profile_name + " ||"
         my_profile_var = tk.StringVar()
         my_profile_var.set(profile_label_text)
         profile_label = tk.Label(self, textvariable=my_profile_var)
-        profile_label.grid(column=7, row=2, sticky='E')
+        profile_label.grid(column=8, row=2, sticky='E')
         top_widgets_list.append(profile_label)
         top_widgets_list.append(my_profile_var)
 
@@ -1032,7 +1033,7 @@ class Topframe(tk.Frame):
         listen_var = tk.StringVar()
         listen_var.set("                     ")
         listen_label = tk.Label(self, textvariable=listen_var)
-        listen_label.grid(column=8, row=2, sticky='E')
+        listen_label.grid(column=9, row=2, sticky='E')
         top_widgets_list.append(listen_label)
         top_widgets_list.append(listen_var)
 
@@ -1047,7 +1048,27 @@ class Topframe(tk.Frame):
         # frame_canvas.config(width=columns_width, height=rows_height)
 
 
-        #top_widgets_list index: 0=save, 1=new, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= profile label, 8=my_profile_var, 9=listen label, 10= listen var
+        #top_widgets_list index: 0=save, 1=new, 2=play loop, 3=write 2 file, 4=clear log, 5=listen mode, 6=switch profile, 7= About/Help 8= profile label, 9=my_profile_var, 10=listen label, 11= listen var
+
+    def about(self):
+        about_w = tk.Tk()
+        about_w.title("About")
+        if os.path.isfile("../Images/Bugger.ico"):
+            about_w.iconbitmap("../Images/Bugger.ico")
+        label_1 = tk.Label(about_w, text="This program is uses the GNU General Public License v3.0, meaning it can be freely distributed and modifed.",font=(None, 11),anchor='w')
+        label_1.grid(column=0, row=1, sticky='NEWS')
+        label_2 = tk.Label(about_w, text="The source code and readme can be found on Github @ https://github.com/RyanQuinnNCSU/serial_tool",font=(None, 11),anchor='w')
+        label_2.grid(column=0, row=2, sticky='NEWS')
+        about_w.update_idletasks()
+
+
+        w = label_1.winfo_width()
+        h = label_1.winfo_height() + label_2.winfo_height()
+        #h = 100
+        #serial_error_mess.update_idletasks()
+        ws = about_w.winfo_screenwidth() # width of the screen
+        hs = about_w.winfo_screenheight() # height of the screen
+        about_w.geometry("%dx%d+%d+%d" % (w,h,ws-3*ws/4,hs-3*hs/4))
 
     def write_2_file(self):
         global transaction_window
@@ -1080,7 +1101,7 @@ class Topframe(tk.Frame):
         #change label to reflect new profile.
         profile_name =  self.get_profile_name()
         profile_label_text = "|| Active Profile: " + profile_name + " ||"
-        top_widgets_list[8].set(profile_label_text) #set label string var to new profile
+        top_widgets_list[9].set(profile_label_text) #set label string var to new profile
 
 
     def get_profile_name(self):
@@ -1112,7 +1133,7 @@ class Topframe(tk.Frame):
         #change label to reflect new profile.
         profile_name =  self.get_profile_name()
         profile_label_text = "|| Active Profile: " + profile_name + " ||"
-        top_widgets_list[8].set(profile_label_text) #set label string var to new profile
+        top_widgets_list[9].set(profile_label_text) #set label string var to new profile
 
     def temp_save_button(self):
         config = {}
@@ -1128,14 +1149,14 @@ class Topframe(tk.Frame):
         global Listen_mode_send_b
         global top_widgets_list
         if listen_mode == False:
-            top_widgets_list[10].set(" Listen Mode Active ||")
+            top_widgets_list[11].set(" Listen Mode Active ||")
             listen_mode = True
             Listen_mode_send_b[0].config(state="normal")
             t = threading.Thread(target = self.serial_listen)
             t.daemon = True
             t.start()
         else:
-            top_widgets_list[10].set("                     ")
+            top_widgets_list[11].set("                     ")
             listen_mode = False
             Listen_mode_send_b[0].config(state="disabled")
 
@@ -1162,7 +1183,7 @@ class Topframe(tk.Frame):
                     transaction_window[2].insert(tk.END, "\r\n"  + "Forced Exit of Listen Mode. Select a working COM port." + "\r\n")
                     #serial_error_message(error_string)
                     listen_mode = False
-                    top_widgets_list[10].set("                     ")
+                    top_widgets_list[11].set("                     ")
 
             else:
                 trans_bytes = ""
