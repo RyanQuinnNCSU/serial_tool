@@ -100,7 +100,7 @@ class SampleApp(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         self._frame = None
-        self.title("Serial Chatter")
+        self.title("deBUGger")
         #self.switch_frame(Main_frame)
         self.state('zoomed')
         upper_frame = tk.Frame(self)
