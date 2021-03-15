@@ -19,7 +19,7 @@ Serial is a common method of communication for embedded systems and IOT products
 - Converting from HEX, DEC, ASCII
 - Automatically send all serial command in a list.
 - Store serial log to files
-<img src="Images/deBUGger_Example.png" height="400">
+<img src="Images/deBUGger_Example.PNG">
 
 
 
