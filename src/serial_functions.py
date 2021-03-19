@@ -231,7 +231,7 @@ def send_serial(bytes,com_port,baudrate,transaction_window,timeout,ascii_flag,li
             final_rsp_string = final_rsp_string + " 0x" + response_redo[start:end]
         print("response redo = " + final_rsp_string)
         #first_qm = response_s.find('\'')
-        if len(response_redo) <= 2:  #(first_qm == -1):
+        if len(final_rsp_string) <= 2:  #(first_qm == -1):
             if listen_mode ==  False:
                 transaction_window.insert(tk.END,"RX: " + "No Response Received" + "\r\n")
                 transaction_window.insert(tk.END,"********************************************" + "\r\n")

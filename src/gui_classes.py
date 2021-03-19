@@ -1136,6 +1136,10 @@ class Topframe(tk.Frame):
         top_widgets_list[9].set(profile_label_text) #set label string var to new profile
 
     def temp_save_button(self):
+        global interval
+        global unsaved_profile
+        timeout = float(interval[0].get())
+        unsaved_profile['Interval'] = timeout
         config = {}
         with open("../json/config.json", "r") as read_file:
             config = json.loads(read_file.read())

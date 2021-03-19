@@ -41,9 +41,28 @@ Now you are ready to start using deBUGger for serial communication.
 
 ## 3. deBUGger Walkthrough:
 This section will provide a walkthrough on how to use deBUGger. The program GUI is broken into 4 sections.
+
+1. Action Buttons:
+> Used to save and load serial settings (profiles) to GUI. Also control other serial modes and features.
+
+2. Serial Command List:
+> An editable list of serial commands (byte arrays).
+
+3. Serial Transaction Log:
+> A terminal showing the bytes transmitted and received over serial.
+
+4. Serial Settings:
+> A menu for configuring serial communication settings.  
+
 <img src="Images/Sections.PNG">
 
 ### Serial Communication:
+
+Now lets walkthrough basic serial communication using the deBUGger. For the purposes of this walkthrough I am going to use a USB to UART bridge with the RX and TX pins connect by a jumper. Meaning any bytes I send over the serial device will be sent back to my PC.
+
+<img src="Images/Serial_Device.JPG">
+
+The first time you lanch debugger, a few default serial commands will be provided in the Command list. To send each command  
 
 ### Profiles:
 
