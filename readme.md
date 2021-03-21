@@ -6,8 +6,8 @@
 1. What is deBUGger?
 2. Installation and Start Up
 3. deBUGger Walkthrough
-4. Modifying the Program
-5. Contact info
+4. Modifying the Source Code
+5. Contact Info
 
 ## 1. What is deBUGger?
 Serial is a common method of communication for embedded systems and IOT products from desktop computers. The deBUGger GUI removes the repetitive work of setting serial setting and writing data bytes by saving this information into json profiles. Other key features of this program are summarized below.
@@ -99,24 +99,74 @@ Once you have added all the commands you would like to remove, press "Apply" and
 
 <img src="Images/new_commands.PNG">
 
-As mentioned previously, you can view serial commands as hex, decimal, or ascii by changing the byte format drop down menu. Doing so will change the commands as they apear in the command list and in the serial transaction log.
+As mentioned previously, you can view serial commands as hex, decimal, or ascii by changing the byte format drop down menu. Doing so will change the commands as they appear in the command list and in the serial transaction log.
 
 <img src="Images/format.PNG">
 
 <img src="Images/conversion.PNG">
 
-If you need to continuously listen for incoming serial bytes press the "listen mode" button (action buttons section). While in 
-
-
-
-
-
-
 ### Profiles:
+
+Serial commands and serial settings are stored in json files called profiles. When deBUGger is opened it reads the last json profile used and displays its serial commands and settings in the GUI.
+
+<img src="Images/json.PNG">
+
+The current profile loaded on deBUGger is shown next to the action buttons.
+
+<img src="Images/active_profile.PNG">
+
+If you edit the serial command list or serial settings and want to keep these changes in the current profile, press the "save" button in the action section.
+
+<img src="Images/json.PNG">
+
+Pressing the "save as new profile" button will open a file explore window, allowing you to save your changes as a new json profile.
+
+<img src="Images/save_as.PNG">
+
+Finally if you want to swap to a different profile, pressing the "switch profile" button. This will open a file explore window for selecting your active profile.   
+
+<img src="Images/switch.PNG">
 
 ### Listen Mode:
 
-### Transaction Window:
+If you want to continuously listen for incoming serial bytes, rather than only listening after sending a command, then press the "listen mode" button. Once listen mode is active, all incoming bytes will be displayed on the transaction log. I think the best way to show you how listen mode works it to show it in action with an example.
+
+<img src="Images/mode.PNG">
+
+For the listen mode demo, I will a Raspberry Pi 3 as an externa serial device. On this RPi, I haven enabled serial over GPIO pins 14 (TX) and 15 (RX) and used jumpers to attach these pens to same USB to UART bridge from previous examples.
+
+ <img src="Images/rpi.jpg">
+
+ For the purposes of demonstrating listen mode I have written a short python script on the RPi to send a "test print" message every 10 seconds. The script will also have the RPi send back any bytes it receives over it's RX pin.
+
+<img src="Images/p_script.PNG">
+
+On the deBUGger, I've edited the command list and switched the byte format to ascii.
+
+<img src="Images/new_commands.PNG">
+
+ When listen mode is active, the message "Listen Mode Active" will be visible above the transaction log. And serial commands sent from the command list can still be sent over serial, but now there is no timeout in listening for a response. Note in the transaction log below, the RPi sends back any commands sent to it and periodically the message "RPI Test Print" is sent to my PC.
+
+ <img src="Images/listen_log.PNG">
+
+ While in listen mode, you can also send messages that are not in the command list by using the text box and send button at the bottom of the transaction log. Not in the log below, "print check" is sent to the RPi.
+
+ <img src="Images/send.PNG">
+
+## 4. Modifying the Source Code
+
+This section will describe how you can running the source python files and create your own exe files of the project.
+
+### Setup Requirements:
+
+### Running Program:
+
+### Creating EXE file:
+
+### Very High Level Overview:
+
+
+
 
 ## 5. Contact Info
 Email: rtquinn2@ncsu.edu
