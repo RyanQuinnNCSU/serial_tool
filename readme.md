@@ -60,9 +60,57 @@ This section will provide a walkthrough on how to use deBUGger. The program GUI 
 
 Now lets walkthrough basic serial communication using the deBUGger. For the purposes of this walkthrough I am going to use a USB to UART bridge with the RX and TX pins connect by a jumper. Meaning any bytes I send over the serial device will be sent back to my PC.
 
-<img src="Images/Serial_Device.JPG">
+<img src="Images/Serial_Device.jpg">
 
-The first time you lanch debugger, a few default serial commands will be provided in the Command list. To send each command  
+To begin serial communication, first we need to select the serial device in the Serial Settings section of the GUI. Start by clicking the refresh button to search for serial devices plugged into your computer.
+
+<img src="Images/refresh.PNG">
+
+Next click on the drop down menu to reveal the device list. For this example I will select the USB to UART Bridge on COM3.
+
+<img src="Images/COM_list.PNG">
+
+After the serial device has been selected, make sure to set the other serial settings to meet your needs. These other settings include the baud rate, byte format (hex,dec,ascii), and the time interval (how long to listen for a serial response after sending a command).
+
+<img src="Images/settings.PNG">
+
+With serial configuration complete, it is now time to start sending serial commands. The first time you open deBUGger a few default serial commands will be provided for you in the command list section. Pressing the ">>" (play) button next to each command will send the command to your chosen serial device.
+
+<img src="Images/play.PNG">
+
+The commands you send over serial can bee seen in the serial transaction log in the middle of the GUI. This log will also show any serial responses before the serial timeout, defined by the time interval setting.
+
+<img src="Images/STL.PNG">
+
+The serial transaction log can be written to a file or cleared by using corresponding action buttons.
+
+ <img src="Images/clear.PNG">
+
+Rather than send each command individually, press the "Loop" button (located in the action buttons section) to run though all the commands in the command list. The loop button will send commands in the order they appear, with time interval separating sending each command.
+
+<img src="Images/loop.PNG">
+
+To modify the command list, press on the "Edit Commands List" button. This will open a new window where commands can be added or removed.
+
+<img src="Images/edit.PNG">
+<img src="Images/popup.PNG">
+
+Once you have added all the commands you would like to remove, press "Apply" and your edited commands will be reflected in the command list on the main window. Once you are done editing the command list, close the pop up window.
+
+<img src="Images/new_commands.PNG">
+
+As mentioned previously, you can view serial commands as hex, decimal, or ascii by changing the byte format drop down menu. Doing so will change the commands as they apear in the command list and in the serial transaction log.
+
+<img src="Images/format.PNG">
+
+<img src="Images/conversion.PNG">
+
+If you need to continuously listen for incoming serial bytes press the "listen mode" button (action buttons section). While in 
+
+
+
+
+
 
 ### Profiles:
 
