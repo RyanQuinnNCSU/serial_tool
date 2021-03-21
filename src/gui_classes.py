@@ -863,7 +863,7 @@ class Optionsframe(tk.Frame):
         COM_drop.config(width=40, font=('Helvetica', 12))
         COM_drop.grid(column=2, row=1, sticky='W')
         #Setup Com Port Refresh button
-        refresh = tk.Button(self, text="Refesh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
+        refresh = tk.Button(self, text="Refresh",command=lambda config=config: self.check_COMs(self,COM_drop,COM_v))
         refresh.grid(column=3, row=1, sticky='E')
 
         space = tk.Label(self)
