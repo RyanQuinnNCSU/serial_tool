@@ -17,7 +17,7 @@ Serial is a common method of communication for embedded systems and IOT products
 - Write serial log to files
 > Note: deBUGger is only supported on Windows, sorry MAC and Linux users.
 
-"deBUGger" is an open source program, meaning you are free to modify the program and add additional features. See section 8 for more details on modifying the Python source code.
+"deBUGger" is an open source program, meaning you are free to modify the program and add additional features. See section 4 for more details on modifying the Python source code.
 
 <img src="Images/deBUGger_Example.PNG">
 
@@ -158,14 +158,61 @@ On the deBUGger, I've edited the command list and switched the byte format to as
 This section will describe how you can running the source python files and create your own exe files of the project.
 
 ### Setup Requirements:
+All the source files are written in Python 3 (I have 3.8.5 installed, but should work on any 3.x.x version)
 
-### Running Program:
+Library dependences
+- tkinter *Standard library, no pip install required*
+- json *Standard library, no pip install required*
+- threading *Standard library, no pip install required*
+- os *Standard library, no pip install required*
+- serial *pip install of pyserial is required (my version was 3.4)*
+- pyinstaller *pip install of pyinstaller is required (my version was 4.2)*
+
+### Executing the Source Files:
+To run the program from the windows command line, open the command line terminal, change directories to the src folder of this repository, and execute the main.py.
+
+ <img src="Images/cmd.PNG">
+
+ > depending on how you configured your PC, you may need to write "python main.py" or "python3 main.py"
+
+ Doing so will launch deBUGger GUI. Note that while the GUI is running, debug prints show up on the terminal. The debug prints are from all the python print() statements in the source code. Any prints you add to the code will appear in the terminal.
+
+<img src="Images/cmd.PNG">
 
 ### Creating EXE file:
 
-### Very High Level Overview:
+To create the sign exe file from the source code I recommend using pyinstaller. First open the command line terminal, change directories to the serial_tool folder (main repo folder) and execute the following command (assuming you have already pip installed pyinstaller).
 
+>your_file_path_to_pyinstaller_lib\pyinstaller --onefile --distpath EXE --name deBUGger --noconsole --icon=Images/Bugger.ico src/main.py
 
+Below is a breakdown of the pyinstaller flags I used to create my EXE.
+"--onefile" create a bundled EXE file of the entire python project.
+"--distpath <dir_path>" sets destination of EXE file
+"--name <output_name>" sets name of output EXE file
+"--noconsole" don't provide a terminal for prints, remove this option if you want to see debug prints
+"--icon=<icon_file.ico>" setting image of the EXE
+
+When you running the command you will see lots of prints as pyinstaller converts the python script into a windows executable.
+
+<img src="Images/exe1.PNG">
+
+After 30 seconds or so, the prints should stop and at the end you will see "Building EXE from EXE-00.toc completed successfully.", confirming that the EXE was built successfully.
+
+<img src="Images/exe1.PNG">
+
+Now you should find your new EXE file in the EXE folder.
+
+<img src="Images/Executable.PNG">
+
+### Very High Level Code Overview:
+
+This program consisted of 3 files.
+- main.py
+- gui_classes.py
+- serial_functions.py
+
+#### main.py
+ 
 
 
 ## 5. Contact Info
