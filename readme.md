@@ -220,7 +220,7 @@ Contains code for all the classes and functions that create the deBUGger GUI
 #### serial_functions.py
 Contains all the functions for connecting to serial devices.
 
-###Key Concepts:
+### Key Concepts:
 
 Here are a few things to under stand when reviewing or modifying the code.
 
@@ -228,16 +228,16 @@ Here are a few things to under stand when reviewing or modifying the code.
 - Frames
 - Threads
 
-####Json files
+#### Json files
 
-Two Json files are used by deBUGger to operate.
+Two json files are used by deBUGger to operate.
 
 1. Config file: The config file contains the list of available serial devices.
 2. User Profile: Contains the serial settings (buadrate,COM port,data format,time interval) and the serial commands.
 
 The json files are used by the deBUGger to know what data to load onto the GUI upon bootup. After bootup the profile json is loaded into a global variable called "unsaved_profile". When users make changes to the serial commands or settings the "unsaved_profile" is updated. When users save or create a new profile, they are dumping the "unsved_profile" to a file. When users switch profiles, the "unsaved_profile" is loaded with a new json file's data.
 
-####Frames:
+#### Frames:
 
 Windows in tkinter (the library used to create the GUI) are made up of frames. These frames are used to organize the placement of all the widgets (think buttons, labels, text boxes) you see on the screen. The placement of these widgets within the frame is set using the "grid()" method (as opposed to "pack()").
 
@@ -256,10 +256,10 @@ Frames:
 
 <img src="Images/nested_f.PNG">
 
-The nested frames are placed within the high level frames (again using "grid()"). If this wasn't done, widgets in the top frame effect the size and placement of the other frames. 
+The nested frames are placed within the high level frames (again using "grid()"). If this wasn't done, widgets in the top frame effect the size and placement of the other frames.
 
 
-####Threads:
+#### Threads:
 
 When listen mode is activated, a new thread is created to read and write serial data to the selected serial device. This keeps the main thread free to react to UI events (button presses, changes to text widgets, etcetera).
 
