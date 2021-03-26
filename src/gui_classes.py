@@ -24,6 +24,7 @@ transaction_window = []
 Listen_mode_send_b = []
 Listen_mode_command=[]
 interval = []
+baud = []
 ascii_mode = []
 #frames:
 top = []
@@ -834,6 +835,7 @@ class Optionsframe(tk.Frame):
         global unsaved_config
         global unsaved_profile
         global interval
+        global baud
         tk.Frame.__init__(self, master)
         self.grid(column=2, row=1, sticky=('NSEW'))
         #load config data
@@ -876,6 +878,7 @@ class Optionsframe(tk.Frame):
         baudrate_entry.insert(0, baudrate)
         baudrate_entry.grid(column=2, row=3, sticky='WE')
         baudrate_entry.bind("<Button-3>", RightClicker)
+        baud.append(baudrate_entry)
 
         space2 = tk.Label(self)
         space2.grid(column=1, row=4,sticky='WENS')
@@ -1136,10 +1139,13 @@ class Topframe(tk.Frame):
         top_widgets_list[9].set(profile_label_text) #set label string var to new profile
 
     def temp_save_button(self):
+        global baud
         global interval
         global unsaved_profile
         timeout = float(interval[0].get())
+        baudrate = baud[0].get()
         unsaved_profile['Interval'] = timeout
+        unsaved_profile['Baudrate'] = baudrate
         config = {}
         with open("../json/config.json", "r") as read_file:
             config = json.loads(read_file.read())
