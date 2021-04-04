@@ -2,6 +2,10 @@
 > Open source serial terminal optimized for testing embedded devices
 <img src="Images/Bugger.png" height="300">
 
+
+Note that much of the information below is also described in a YouTube video:
+[![deBUGger Tutorial](Images/TN.PNG)](https://www.youtube.com/watch?v=QZmAHdEapdM)
+
 ## Table of Contents
 1. What is deBUGger?
 2. Installation and Start Up
