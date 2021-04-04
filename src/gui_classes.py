@@ -393,6 +393,7 @@ class Commandframe(tk.Frame):
         global play_but_list
         global unsaved_profile
         global ascii_mode
+        global canvas_list
         #clear data from previous iterations
 
         remove_but_list*= 0
