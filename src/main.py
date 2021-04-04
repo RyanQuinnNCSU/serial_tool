@@ -16,15 +16,15 @@ default_profile = {
     "Commands": [
         {
             "name": "C1",
-            "bytes": "0x01"
+            "bytes": "0x01 0x01 0x01"
         },
         {
             "name": "C2",
-            "bytes": "0x02"
+            "bytes": "0x02 0x02 0x02"
         },
         {
             "name": "C3",
-            "bytes": "0x03"
+            "bytes": "0x03 0x03 0x03"
         }
     ]
 }

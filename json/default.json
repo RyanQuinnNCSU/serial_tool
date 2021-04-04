@@ -1,1 +1,21 @@
-{"Com Port": "COM3", "Baudrate": 115200, "Interval": 1.0, "Byte Format": "HEX", "Num_Commands": 3, "Commands": [{"name": "C1", "bytes": "0x01"}, {"name": "C2", "bytes": "0x02"}, {"name": "C3", "bytes": "0x03"}]}
+{
+    "Com Port": "COM3",
+    "Baudrate": "115200",
+    "Interval": 1.0,
+    "Byte Format": "HEX",
+    "Num_Commands": 3,
+    "Commands": [
+        {
+            "name": "C1",
+            "bytes": "0x01 0x01 0x01"
+        },
+        {
+            "name": "C2",
+            "bytes": "0x02 0x02 0x02"
+        },
+        {
+            "name": "C3",
+            "bytes": "0x03 0x03 0x03"
+        }
+    ]
+}

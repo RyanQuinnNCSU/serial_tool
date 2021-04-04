@@ -1,1 +1,4 @@
-{"Profile": "C:/Users/rquin/Documents/Coding Projects/serial_tool/json_t/profile4.json", "COM List": ["No Devices Detected"]}
+{
+    "Profile": "../json/default.json",
+    "COM List": []
+}

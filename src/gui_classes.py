@@ -910,6 +910,7 @@ class Optionsframe(tk.Frame):
         Interval_entry.insert(0, Interval)
         Interval_entry.grid(column=2, row=7, sticky='WE')
         Interval_entry.bind("<Button-3>", RightClicker)
+        interval.clear()
         interval.append(Interval_entry)
 
     def change_ascii(self,byte_type):
